@@ -9,7 +9,6 @@
   --bg: #f6f8fb;
   --bg-2: #ffffff;
   --bg-3: #f0f4fa;
-  --panel: #ffffff;
   --line: #e4e9f2;
   --line-2: #d5dce8;
   --text: #1e2430;
@@ -18,49 +17,77 @@
   --blue: #2563eb;
   --blue-hover: #1d4fd7;
   --blue-soft: #eaf1ff;
-  --blue-soft-2: #dbe8ff;
   --green: #16a34a;
+  --green-soft: #e9f9ef;
   --orange: #d97706;
+  --orange-soft: #fef6e7;
   --purple: #7c3aed;
-  --cyan: #0891b2;
+  --purple-soft: #f2ecff;
   --red: #dc2626;
+  --red-soft: #fef2f2;
   --mono: "SF Mono", "JetBrains Mono", "Cascadia Code", Consolas, monospace;
   --shadow: 0 1px 2px rgba(16,24,40,.04), 0 4px 12px rgba(16,24,40,.04);
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
 body {
-  background: var(--bg);
-  color: var(--text);
+  background: var(--bg); color: var(--text);
   font: 13px/1.55 -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
+  overflow: hidden; -webkit-font-smoothing: antialiased;
 }
 button { font: inherit; color: inherit; border: none; background: none; cursor: pointer; }
-input { font: inherit; color: inherit; }
+input, textarea, select { font: inherit; color: inherit; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: #cfd7e4; border-radius: 10px; border: 3px solid transparent; background-clip: padding-box; }
 ::-webkit-scrollbar-thumb:hover { background: #b6c1d4; background-clip: padding-box; }
 ::-webkit-scrollbar-track { background: transparent; }
+.hidden { display: none !important; }
 
+/* ===== 连接页 ===== */
+.gate {
+  position: fixed; inset: 0; z-index: 200;
+  background: var(--bg); display: flex; align-items: center; justify-content: center;
+}
+.gate-card {
+  width: 440px; background: #fff; border: 1px solid var(--line);
+  border-radius: 16px; padding: 30px 32px; box-shadow: 0 8px 40px rgba(16,24,40,.08);
+}
+.gate-logo { font-weight: 800; font-size: 22px; letter-spacing: -.6px; margin-bottom: 4px; }
+.gate-logo b { color: var(--blue); }
+.gate-sub { color: var(--dim); font-size: 12.5px; margin-bottom: 22px; line-height: 1.6; }
+.gate-card label { display: block; font-size: 12px; font-weight: 600; color: var(--dim); margin-bottom: 6px; }
+.gate-card input {
+  width: 100%; background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 9px; padding: 9px 12px; font-size: 13px; outline: none; margin-bottom: 14px;
+}
+.gate-card input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.10); background: #fff; }
+.gate-btn {
+  width: 100%; background: var(--blue); color: #fff; border-radius: 9px;
+  padding: 10px; font-size: 13.5px; font-weight: 600; margin-bottom: 10px;
+}
+.gate-btn:hover { background: var(--blue-hover); }
+.gate-btn:disabled { opacity: .5; cursor: default; }
+.gate-err { color: var(--red); font-size: 12px; min-height: 18px; margin-bottom: 6px; }
+.gate-tip { color: var(--dim-2); font-size: 11.5px; line-height: 1.65; }
+.gate-tip a { color: var(--blue); }
+
+/* ===== 主界面 ===== */
 .app { display: flex; height: 100vh; }
 
-/* ====== 一级：窄条 ====== */
 .rail {
-  width: 76px; flex-shrink: 0;
-  background: var(--bg-2);
+  width: 76px; flex-shrink: 0; background: var(--bg-2);
   border-right: 1px solid var(--line);
-  display: flex; flex-direction: column; align-items: center;
-  padding: 14px 0 10px;
+  display: flex; flex-direction: column; align-items: center; padding: 14px 0 10px;
+  overflow-y: auto; overflow-x: hidden;
 }
-.logo { font-weight: 800; font-size: 14px; letter-spacing: -.5px; color: var(--text); margin-bottom: 22px; text-align: center; line-height: 1.1; }
+.rail::-webkit-scrollbar { width: 0; }
+.logo { font-weight: 800; font-size: 12px; letter-spacing: -.3px; color: var(--text); margin-bottom: 16px; text-align: center; line-height: 1.15; flex-shrink: 0; }
 .logo b { color: var(--blue); }
 .rail-item {
-  width: 46px; height: 46px;
+  width: 46px; height: 46px; flex-shrink: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px; border-radius: 11px; margin-bottom: 5px;
-  color: var(--dim-2); transition: background .16s, color .16s;
-  position: relative;
+  gap: 3px; border-radius: 11px; margin-bottom: 4px;
+  color: var(--dim-2); transition: background .16s, color .16s; position: relative;
 }
 .rail-item:hover { background: var(--bg-3); color: var(--dim); }
 .rail-item.active { background: var(--blue-soft); color: var(--blue); }
@@ -68,26 +95,22 @@ input { font: inherit; color: inherit; }
   content: ""; position: absolute; left: -13px; top: 11px; bottom: 11px;
   width: 2.5px; border-radius: 3px; background: var(--blue);
 }
-.rail-item svg { width: 20px; height: 20px; }
-.rail-item span { font-size: 9px; letter-spacing: .2px; }
-.rail-gap { flex: 1; }
+.rail-item svg { width: 19px; height: 19px; }
+.rail-item span { font-size: 8.5px; letter-spacing: .1px; max-width: 44px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rail-gap { flex: 1; min-height: 8px; }
 
-/* ====== 二级：侧栏 ====== */
 .side {
-  width: 252px; flex-shrink: 0;
-  background: var(--bg-2);
+  width: 252px; flex-shrink: 0; background: var(--bg-2);
   border-right: 1px solid var(--line);
-  display: flex; flex-direction: column;
-  min-height: 0;
+  display: flex; flex-direction: column; min-height: 0;
 }
 .side-top { padding: 14px 12px 10px; }
 .repo-switch {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 14px; font-weight: 600; padding: 5px 6px;
-  width: 100%; text-align: left; border-radius: 8px;
+  display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600;
+  padding: 6px 8px; width: 100%; text-align: left; border-radius: 8px; border: 1px solid transparent;
 }
-.repo-switch:hover { background: var(--bg-3); }
-.repo-switch .org { color: var(--text); }
+.repo-switch:hover { background: var(--bg-3); border-color: var(--line); }
+.repo-switch .org { color: var(--dim); font-weight: 500; }
 .repo-switch .sep { color: var(--dim-2); }
 .repo-switch .arrow { margin-left: auto; color: var(--dim-2); font-size: 10px; }
 .search-wrap { margin-top: 9px; position: relative; }
@@ -97,28 +120,20 @@ input { font: inherit; color: inherit; }
   transition: border-color .18s, box-shadow .18s;
 }
 .search-wrap input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.10); background: #fff; }
-.search-wrap::before {
-  content: "⌕"; position: absolute; left: 10px; top: 4px; color: var(--dim-2); font-size: 14px;
-}
+.search-wrap::before { content: "⌕"; position: absolute; left: 10px; top: 4px; color: var(--dim-2); font-size: 14px; }
 .side-nav { flex: 1; overflow-y: auto; padding: 8px 8px 12px; min-height: 0; }
 .nav-item {
-  display: flex; align-items: center; gap: 9px;
-  padding: 8px 10px; border-radius: 9px; width: 100%; text-align: left;
-  color: var(--dim); font-size: 13px; margin-bottom: 1px;
-  transition: background .14s, color .14s;
+  display: flex; align-items: center; gap: 9px; padding: 8px 10px;
+  border-radius: 9px; width: 100%; text-align: left; color: var(--dim);
+  font-size: 13px; margin-bottom: 1px; transition: background .14s, color .14s;
 }
 .nav-item:hover { background: var(--bg-3); color: var(--text); }
 .nav-item.active { background: var(--blue-soft); color: var(--blue); font-weight: 600; }
 .nav-item .ico { width: 16px; text-align: center; opacity: .85; font-size: 13px; flex-shrink: 0; }
-.nav-item .cnt {
-  margin-left: auto; font-size: 10.5px; background: var(--bg-3); color: var(--dim);
-  padding: 1px 7px; border-radius: 99px; min-width: 22px; text-align: center; border: 1px solid var(--line);
-}
-.nav-item.active .cnt { background: #fff; color: var(--blue); border-color: var(--blue-soft-2); }
+.nav-item .cnt { margin-left: auto; font-size: 10.5px; background: var(--bg-3); color: var(--dim); padding: 1px 7px; border-radius: 99px; min-width: 22px; text-align: center; border: 1px solid var(--line); }
+.nav-item.active .cnt { background: #fff; color: var(--blue); border-color: var(--blue-soft); }
 
-/* ====== 主区 ====== */
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
-
 .tabs {
   height: 42px; flex-shrink: 0; display: flex; align-items: stretch;
   background: var(--bg-2); border-bottom: 1px solid var(--line);
@@ -126,53 +141,51 @@ input { font: inherit; color: inherit; }
 }
 .tabs::-webkit-scrollbar { height: 0; }
 .tab {
-  display: flex; align-items: center; gap: 7px;
-  padding: 0 14px; font-size: 12.5px; color: var(--dim);
-  border-right: 1px solid var(--line); white-space: nowrap;
-  position: relative; transition: background .14s, color .14s;
+  display: flex; align-items: center; gap: 7px; padding: 0 14px;
+  font-size: 12.5px; color: var(--dim); border-right: 1px solid var(--line);
+  white-space: nowrap; position: relative; transition: background .14s, color .14s;
 }
 .tab:hover { background: var(--bg-3); color: var(--text); }
 .tab.active { background: #fff; color: var(--text); font-weight: 600; }
-.tab.active::after {
-  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--blue);
-}
-.tab .ftype { font-size: 10px; font-weight: 700; flex-shrink: 0; }
+.tab.active::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--blue); }
 .tab .x { opacity: 0; font-size: 11px; padding: 1px 5px; border-radius: 4px; }
 .tab:hover .x, .tab.active .x { opacity: .5; }
 .tab .x:hover { opacity: 1; background: var(--bg-3); }
 .tab-add { display: flex; align-items: center; padding: 0 15px; color: var(--dim-2); font-size: 17px; }
 .tab-add:hover { color: var(--blue); }
 
+.view { flex: 1; min-height: 0; display: none; flex-direction: column; overflow: hidden; }
+.view.active { display: flex; }
+
+/* 文件视图 */
 .workspace { flex: 1; display: flex; min-height: 0; }
 .editor-area { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .editor-bar {
   height: 40px; flex-shrink: 0; display: flex; align-items: center; gap: 10px;
   padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--bg-2);
 }
-.breadcrumb { font-size: 12px; color: var(--dim); }
+.breadcrumb { font-size: 12px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .breadcrumb .f { color: var(--text); font-weight: 500; }
-.editor-actions { margin-left: auto; display: flex; gap: 5px; align-items: center; }
+.editor-actions { margin-left: auto; display: flex; gap: 5px; align-items: center; flex-shrink: 0; }
 .mini-btn {
   font-size: 11.5px; padding: 4px 11px; border-radius: 7px;
   color: var(--dim); border: 1px solid transparent;
 }
 .mini-btn:hover { background: var(--bg-3); color: var(--text); }
-.mini-btn.primary { background: var(--blue-soft); color: var(--blue); }
-
+.mini-btn.primary { background: var(--blue); color: #fff; }
+.mini-btn.primary:hover { background: var(--blue-hover); }
+.mini-btn:disabled { opacity: .45; cursor: default; background: none; color: var(--dim); }
 .code-scroll { flex: 1; overflow: auto; display: flex; min-height: 0; background: #fff; }
 .gutter {
-  width: 54px; flex-shrink: 0; background: #fbfcfe;
-  color: #b6c0d0; font: 12.5px/1.68 var(--mono); text-align: right;
-  padding: 14px 12px 14px 0; user-select: none; border-right: 1px solid var(--line);
+  width: 54px; flex-shrink: 0; background: #fbfcfe; color: #b6c0d0;
+  font: 12.5px/1.68 var(--mono); text-align: right; padding: 14px 12px 14px 0;
+  user-select: none; border-right: 1px solid var(--line); overflow: hidden;
 }
 .code {
-  flex: 1; margin: 0; padding: 14px 20px; overflow: visible;
+  flex: 1; margin: 0; padding: 14px 20px; overflow: visible; border: none; outline: none;
   font: 12.5px/1.68 var(--mono); color: #24292f; white-space: pre; tab-size: 2;
+  background: transparent; resize: none;
 }
-.k { color: #cf222e; } .s { color: #0a3069; } .c { color: #6e7781; font-style: italic; }
-.t { color: #953800; } .a { color: #116329; } .fn { color: #8250df; }
-
-/* 右侧文件树 */
 .filetree {
   width: 264px; flex-shrink: 0; border-left: 1px solid var(--line);
   background: var(--bg-2); display: flex; flex-direction: column; min-height: 0;
@@ -180,7 +193,7 @@ input { font: inherit; color: inherit; }
 .ft-head {
   height: 40px; flex-shrink: 0; display: flex; align-items: center; gap: 6px;
   padding: 0 14px; border-bottom: 1px solid var(--line);
-  font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dim-2); font-weight: 600;
+  font-size: 11px; letter-spacing: 1.2px; color: var(--dim-2); font-weight: 600;
 }
 .ft-head .acts { margin-left: auto; display: flex; gap: 1px; }
 .ft-body { flex: 1; overflow: auto; padding: 8px 6px 12px; font-size: 12.5px; }
@@ -195,28 +208,74 @@ input { font: inherit; color: inherit; }
 .ft-row .fi { font-size: 11px; flex-shrink: 0; width: 14px; text-align: center; }
 .ft-row .nm { overflow: hidden; text-overflow: ellipsis; }
 .ft-kids { padding-left: 16px; }
-.icon-ts { color: #2563eb; } .icon-md { color: var(--dim); } .icon-json { color: var(--orange); }
-.icon-css { color: var(--purple); } .icon-folder { color: #8b96ab; } .icon-star { color: var(--orange); }
 
-/* 底部面板 */
-.bottom {
-  height: 176px; flex-shrink: 0; border-top: 1px solid var(--line);
-  background: var(--bg-2); display: flex; flex-direction: column;
+/* 列表视图 */
+.list-view { flex: 1; overflow: auto; padding: 20px 24px; }
+.list-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.list-head h2 { margin: 0; font-size: 17px; font-weight: 700; }
+.list-head .sub { font-size: 12px; color: var(--dim); }
+.list-head .right { margin-left: auto; display: flex; gap: 7px; }
+.btn-primary { background: var(--blue); color: #fff; border-radius: 8px; padding: 6px 14px; font-size: 12.5px; font-weight: 600; }
+.btn-primary:hover { background: var(--blue-hover); }
+.btn-ghost { border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 14px; font-size: 12.5px; color: var(--dim); }
+.btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+.row-list { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+.row {
+  display: flex; align-items: center; gap: 12px; padding: 13px 16px;
+  border-bottom: 1px solid var(--line); transition: background .12s;
 }
+.row:last-child { border-bottom: none; }
+.row.clickable { cursor: pointer; }
+.row:hover { background: var(--bg-3); }
+.row .num { font-family: var(--mono); font-size: 12px; color: var(--dim-2); width: 52px; flex-shrink: 0; }
+.row .main-txt { flex: 1; min-width: 0; }
+.row .title { font-size: 13.5px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 7px; }
+.row .meta { font-size: 11.5px; color: var(--dim-2); margin-top: 2px; }
+.row .tag { font-size: 10.5px; padding: 2px 8px; border-radius: 99px; font-weight: 600; white-space: nowrap; }
+.tag.open { background: var(--green-soft); color: var(--green); }
+.tag.closed { background: var(--purple-soft); color: var(--purple); }
+.tag.merged { background: var(--purple-soft); color: var(--purple); }
+.tag.ok { background: var(--green-soft); color: var(--green); }
+.tag.fail { background: var(--red-soft); color: var(--red); }
+.tag.run { background: var(--orange-soft); color: var(--orange); }
+.tag.draft { background: var(--bg-3); color: var(--dim); }
+.row .who { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--dim); flex-shrink: 0; }
+.avatar {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 9px; font-weight: 700;
+}
+.empty-state { text-align: center; padding: 50px 20px; color: var(--dim-2); font-size: 13px; }
+.loading { text-align: center; padding: 40px; color: var(--dim-2); font-size: 13px; }
+
+/* 设置视图 */
+.settings-view { flex: 1; overflow: auto; padding: 24px; }
+.settings-view h2 { margin: 0 0 4px; font-size: 17px; }
+.settings-view .desc { color: var(--dim); font-size: 12.5px; margin-bottom: 20px; }
+.set-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow); }
+.set-card h3 { margin: 0 0 4px; font-size: 14px; }
+.set-card .hint { color: var(--dim-2); font-size: 12px; margin-bottom: 14px; }
+.set-field { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.set-field:last-child { border-bottom: none; }
+.set-field label { flex: 1; font-size: 13px; }
+.set-field .sub { color: var(--dim-2); font-size: 11.5px; margin-top: 1px; }
+.switch { width: 42px; height: 24px; border-radius: 99px; background: var(--line-2); position: relative; transition: background .18s; flex-shrink: 0; cursor: pointer; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.18); transition: transform .18s; }
+.switch.on { background: var(--blue); }
+.switch.on::after { transform: translateX(18px); }
+.set-input { width: 240px; background: var(--bg-3); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 12.5px; outline: none; }
+.set-input:focus { border-color: var(--blue); }
+
+/* 底部终端 */
+.bottom { height: 160px; flex-shrink: 0; border-top: 1px solid var(--line); background: var(--bg-2); display: flex; flex-direction: column; }
 .bottom-tabs { height: 36px; flex-shrink: 0; display: flex; align-items: stretch; border-bottom: 1px solid var(--line); }
-.bt {
-  display: flex; align-items: center; gap: 6px; padding: 0 14px;
-  font-size: 11.5px; color: var(--dim-2); border-right: 1px solid var(--line);
-  letter-spacing: .2px;
-}
+.bt { display: flex; align-items: center; gap: 6px; padding: 0 14px; font-size: 11.5px; color: var(--dim-2); border-right: 1px solid var(--line); }
 .bt:hover { background: var(--bg-3); }
 .bt.active { color: var(--text); font-weight: 600; background: #fff; box-shadow: inset 0 2px 0 var(--blue); }
 .bt .cnt { font-size: 10px; background: var(--bg-3); padding: 0 6px; border-radius: 99px; color: var(--dim); }
 .bottom-right { margin-left: auto; display: flex; align-items: center; gap: 7px; padding-right: 10px; }
-.sel {
-  background: var(--bg-3); border: 1px solid var(--line); border-radius: 7px;
-  padding: 3px 9px; font-size: 11px; color: var(--dim);
-}
+.sel { background: var(--bg-3); border: 1px solid var(--line); border-radius: 7px; padding: 3px 9px; font-size: 11px; color: var(--dim); }
 .bottom-body { flex: 1; overflow: auto; padding: 11px 16px; font: 12px/1.65 var(--mono); min-height: 0; }
 .term-line { color: var(--dim); }
 .term-line .prompt { color: var(--green); font-weight: 600; }
@@ -224,44 +283,7 @@ input { font: inherit; color: inherit; }
 .term-line .ok { color: var(--green); }
 .term-line .info { color: var(--cyan); }
 .term-line .warn { color: var(--orange); }
-
-/* 右侧助理面板 */
-.assistant {
-  width: 312px; flex-shrink: 0; border-left: 1px solid var(--line);
-  background: var(--bg-2); display: flex; flex-direction: column;
-}
-.as-head {
-  height: 40px; flex-shrink: 0; display: flex; align-items: center; gap: 8px;
-  padding: 0 15px; border-bottom: 1px solid var(--line);
-  font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dim-2); font-weight: 600;
-}
-.as-body { flex: 1; overflow: auto; padding: 16px; min-height: 0; }
-.as-hero { text-align: center; padding: 22px 4px 16px; }
-.as-hero .spark { font-size: 26px; color: var(--blue); margin-bottom: 10px; }
-.as-hero h3 { margin: 0 0 5px; font-size: 15px; }
-.as-hero p { margin: 0; font-size: 11.5px; color: var(--dim-2); line-height: 1.55; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 16px; }
-.chip {
-  font-size: 11px; padding: 6px 11px; border-radius: 99px;
-  border: 1px solid var(--line); color: var(--dim); background: var(--bg-3);
-  transition: border-color .15s, color .15s, background .15s;
-}
-.chip:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); }
-.as-input {
-  flex-shrink: 0; display: flex; gap: 8px; padding: 11px 13px; border-top: 1px solid var(--line);
-}
-.as-input input {
-  flex: 1; background: var(--bg-3); border: 1px solid var(--line);
-  border-radius: 9px; padding: 8px 11px; font-size: 12px; outline: none;
-  transition: border-color .18s, box-shadow .18s, background .18s;
-}
-.as-input input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.10); background: #fff; }
-.as-send {
-  width: 34px; border-radius: 9px; background: var(--blue); color: #fff;
-  display: flex; align-items: center; justify-content: center; font-size: 13px;
-  transition: background .15s;
-}
-.as-send:hover { background: var(--blue-hover); }
+.term-line .err { color: var(--red); }
 
 /* 状态栏 */
 .statusbar {
@@ -269,327 +291,163 @@ input { font: inherit; color: inherit; }
   padding: 0 16px; background: var(--bg-2); border-top: 1px solid var(--line);
   font-size: 10.5px; color: var(--dim-2);
 }
-.statusbar .kbd {
-  background: var(--bg-3); border: 1px solid var(--line); border-radius: 4px;
-  padding: 0 5px; font-size: 10px; color: var(--blue);
-}
+.statusbar .kbd { background: var(--bg-3); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font-size: 10px; color: var(--blue); }
 .statusbar .spacer { flex: 1; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--dim-2); display: inline-block; margin-right: 5px; }
+.dot.ok { background: var(--green); }
 
-/* 语言切换 */
-.lang-btn {
-  position: fixed; right: 14px; bottom: 34px; z-index: 100;
-  background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 99px;
-  padding: 5px 13px; font-size: 11px; color: var(--dim); box-shadow: var(--shadow);
+/* 弹窗 */
+.modal-mask {
+  position: fixed; inset: 0; background: rgba(16,24,40,.35); z-index: 300;
+  display: flex; align-items: center; justify-content: center;
 }
-.lang-btn:hover { border-color: var(--blue); color: var(--blue); }
+.modal {
+  width: 520px; background: #fff; border-radius: 14px; padding: 22px 24px;
+  box-shadow: 0 20px 60px rgba(16,24,40,.22); max-height: 86vh; overflow: auto;
+}
+.modal h3 { margin: 0 0 14px; font-size: 16px; }
+.modal input, .modal textarea, .modal select {
+  width: 100%; background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 9px; padding: 9px 12px; font-size: 13px; outline: none; margin-bottom: 10px;
+}
+.modal textarea { min-height: 120px; font-family: var(--mono); font-size: 12px; resize: vertical; }
+.modal input:focus, .modal textarea:focus { border-color: var(--blue); background: #fff; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+
+/* 下拉 */
+.dropdown {
+  position: absolute; background: #fff; border: 1px solid var(--line-2);
+  border-radius: 10px; box-shadow: 0 10px 30px rgba(16,24,40,.14);
+  min-width: 240px; max-height: 380px; overflow: auto; z-index: 150; padding: 6px;
+}
+.dropdown .dd-item {
+  padding: 8px 11px; border-radius: 8px; font-size: 12.5px; color: var(--dim);
+  cursor: pointer; display: flex; align-items: center; gap: 7px;
+}
+.dropdown .dd-item:hover { background: var(--bg-3); color: var(--text); }
+.dropdown .dd-item.active { background: var(--blue-soft); color: var(--blue); font-weight: 600; }
+.dropdown .dd-sep { height: 1px; background: var(--line); margin: 5px 4px; }
+
+.toast {
+  position: fixed; right: 20px; bottom: 40px; z-index: 400;
+  background: #1e2430; color: #fff; padding: 10px 16px; border-radius: 10px;
+  font-size: 12.5px; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  opacity: 0; transform: translateY(8px); transition: opacity .2s, transform .2s;
+  pointer-events: none; max-width: 400px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.err { background: #b91c1c; }
+.toast.ok { background: #15803d; }
 </style>
 </head>
 <body>
-<div class="app">
 
-  <nav class="rail">
+<!-- 连接页 -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">demo<b>putter</b></div>
+    <div class="gate-sub">一个给开发者和 AI 用的仓库工作台。填入 GitHub 个人访问令牌即可开始，令牌只存在本机。</div>
+    <label>GitHub 令牌</label>
+    <input id="gateToken" type="password" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+    <div class="gate-err" id="gateErr"></div>
+    <button class="gate-btn" id="gateConnect">连接</button>
+    <div class="gate-tip">在 <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> 生成经典令牌，勾选 <b>repo</b>（读写仓库）；要看工作流再勾 <b>workflow</b>。</div>
+  </div>
+</div>
+
+<!-- 主界面 -->
+<div class="app hidden" id="app">
+  <nav class="rail" id="rail">
     <div class="logo">demo<b>putter</b></div>
-    <button class="rail-item" title="Settings">
+    <button class="rail-item" id="railSettings" title="设置">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
     </button>
-    <div style="height:10px"></div>
-    <button class="rail-item active" data-ws="web">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
-      <span>web</span>
-    </button>
-    <button class="rail-item" data-ws="api">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
-      <span>api</span>
-    </button>
-    <button class="rail-item" data-ws="mobile">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></svg>
-      <span>mobile</span>
-    </button>
-    <button class="rail-item" data-ws="infra">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 8l8-4 8 4-8 4-8-4z"/><path d="M4 12l8 4 8-4"/><path d="M4 16l8 4 8-4"/></svg>
-      <span>infra</span>
-    </button>
-    <button class="rail-item" data-ws="docs">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/></svg>
-      <span>docs</span>
-    </button>
-    <button class="rail-item" data-ws="design">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg>
-      <span>design</span>
-    </button>
+    <div style="height:8px"></div>
+    <div id="railRepos" style="display:flex;flex-direction:column;align-items:center;"></div>
     <div class="rail-gap"></div>
-    <button class="rail-item" title="Add workspace">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+    <button class="rail-item" id="railRefresh" title="刷新仓库">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
     </button>
   </nav>
 
   <aside class="side">
     <div class="side-top">
-      <button class="repo-switch">
-        <span class="org">acme</span><span class="sep">/</span><span>web</span>
+      <button class="repo-switch" id="repoSwitch">
+        <span class="org" id="repoOwner">—</span><span class="sep">/</span><span id="repoName">—</span>
         <span class="arrow">▾</span>
       </button>
-      <div class="search-wrap">
-        <input placeholder="Search in repository…" data-i18n-placeholder="search">
-      </div>
+      <div class="search-wrap"><input id="searchBox" placeholder="在仓库里搜索…"></div>
     </div>
     <div class="side-nav" id="sideNav">
-      <button class="nav-item active" data-view="files"><span class="ico">▤</span><span data-i18n="files">Files</span></button>
-      <button class="nav-item" data-view="commits"><span class="ico">◷</span><span data-i18n="commits">Commits</span></button>
-      <button class="nav-item" data-view="pulls"><span class="ico">⇄</span><span data-i18n="pulls">Pull Requests</span><span class="cnt">3</span></button>
-      <button class="nav-item" data-view="issues"><span class="ico">◎</span><span data-i18n="issues">Issues</span><span class="cnt">12</span></button>
-      <button class="nav-item" data-view="actions"><span class="ico">▶</span><span data-i18n="actions">Actions</span></button>
-      <button class="nav-item" data-view="releases"><span class="ico">◇</span><span data-i18n="releases">Releases</span></button>
-      <button class="nav-item" data-view="settings"><span class="ico">⚙</span><span data-i18n="settings">Settings</span></button>
+      <button class="nav-item active" data-view="files"><span class="ico">▤</span>文件</button>
+      <button class="nav-item" data-view="commits"><span class="ico">◷</span>提交</button>
+      <button class="nav-item" data-view="pulls"><span class="ico">⇄</span>拉取请求<span class="cnt" id="cntPulls"></span></button>
+      <button class="nav-item" data-view="issues"><span class="ico">◎</span>问题<span class="cnt" id="cntIssues"></span></button>
+      <button class="nav-item" data-view="actions"><span class="ico">▶</span>动作</button>
+      <button class="nav-item" data-view="releases"><span class="ico">◇</span>发布</button>
+      <button class="nav-item" data-view="settings"><span class="ico">⚙</span>设置</button>
     </div>
   </aside>
 
   <main class="main">
-    <div class="tabs" id="tabs">
-      <div class="tab active"><span class="ftype icon-ts">◈</span>index.tsx<span class="x">×</span></div>
-      <div class="tab"><span class="ftype icon-ts">◈</span>auth.ts<span class="x">×</span></div>
-      <div class="tab"><span class="ftype icon-ts">◈</span>tailwind.config.ts<span class="x">×</span></div>
-      <div class="tab"><span class="ftype icon-md">▤</span>README.md<span class="x">×</span></div>
-      <div class="tab"><span class="ftype icon-folder">◈</span>docker-compose.yml<span class="x">×</span></div>
-      <div class="tab-add">+</div>
-    </div>
+    <div class="tabs" id="tabs"></div>
 
-    <div class="workspace">
-      <div class="editor-area">
-        <div class="editor-bar">
-          <span class="breadcrumb">src / app / <span class="f">index.tsx</span></span>
-          <span style="color:var(--dim-2);font-size:11px">⧉</span>
-          <div class="editor-actions">
-            <button class="mini-btn">Pretty</button>
-            <button class="mini-btn">Blame</button>
-            <button class="mini-btn">⋯</button>
+    <div class="view active" id="view-files">
+      <div class="workspace">
+        <div class="editor-area">
+          <div class="editor-bar">
+            <span class="breadcrumb" id="breadcrumb">未选择文件</span>
+            <div class="editor-actions">
+              <button class="mini-btn" id="btnSave" disabled>保存</button>
+              <button class="mini-btn primary" id="btnCommit" disabled>提交</button>
+            </div>
+          </div>
+          <div class="code-scroll">
+            <div class="gutter" id="gutter"></div>
+            <textarea class="code" id="code" spellcheck="false" placeholder="从右侧文件树里点一个文件"></textarea>
           </div>
         </div>
-        <div class="code-scroll">
-          <div class="gutter" id="gutter"></div>
-          <pre class="code" id="code"></pre>
-        </div>
-      </div>
-
-      <div class="filetree">
-        <div class="ft-head"><span data-i18n="files">Files</span>
-          <div class="acts">
-            <button class="mini-btn" title="Download">⤓</button>
-            <button class="mini-btn" title="New file">⊞</button>
-            <button class="mini-btn" title="More">⋯</button>
+        <div class="filetree">
+          <div class="ft-head">文件
+            <div class="acts">
+              <button class="mini-btn" id="ftRefresh" title="刷新">↻</button>
+            </div>
           </div>
+          <div class="ft-body" id="fileTree"></div>
         </div>
-        <div class="ft-body" id="fileTree"></div>
       </div>
     </div>
 
-    <div class="bottom">
+    <div class="view" id="view-commits"><div class="list-view" id="listCommits"></div></div>
+    <div class="view" id="view-pulls"><div class="list-view" id="listPulls"></div></div>
+    <div class="view" id="view-issues"><div class="list-view" id="listIssues"></div></div>
+    <div class="view" id="view-actions"><div class="list-view" id="listActions"></div></div>
+    <div class="view" id="view-releases"><div class="list-view" id="listReleases"></div></div>
+    <div class="view" id="view-settings"><div class="settings-view" id="viewSettings"></div></div>
+
+    <div class="bottom" id="bottom">
       <div class="bottom-tabs">
-        <div class="bt active" data-i18n="terminal">Terminal</div>
-        <div class="bt"><span data-i18n="problems">Problems</span> <span class="cnt">0</span></div>
-        <div class="bt" data-i18n="output">Output</div>
-        <div class="bt" data-i18n="debug">Debug Console</div>
-        <div class="bottom-right">
-          <span class="sel">zsh ▾</span>
-          <span class="sel" data-i18n="assistant">Assistant</span>
-        </div>
+        <div class="bt active">终端</div>
+        <div class="bt">问题 <span class="cnt">0</span></div>
+        <div class="bt">输出</div>
+        <div class="bt">调试控制台</div>
+        <div class="bottom-right"><span class="sel">日志</span></div>
       </div>
-      <div class="bottom-body" id="terminal">
-        <div class="term-line"><span class="prompt">macbook:web acme$</span> pnpm dev</div>
-        <div class="term-line"> </div>
-        <div class="term-line">&gt; web@0.1.0 dev /Users/acme/projects/web</div>
-        <div class="term-line">&gt; next dev</div>
-        <div class="term-line"> </div>
-        <div class="term-line"><span class="info">▲ Next.js 14.2.3</span></div>
-        <div class="term-line">- Local:        <span class="path">http://localhost:3000</span></div>
-        <div class="term-line">- Network:      http://192.168.1.24:3000</div>
-        <div class="term-line"> </div>
-        <div class="term-line"><span class="ok">✓ Ready in 812ms</span></div>
-        <div class="term-line"><span class="ok">✓ Compiled / in 2.1s (483 modules)</span></div>
-        <div class="term-line"><span class="ok">✓ Compiled /_app in 268ms</span></div>
-      </div>
+      <div class="bottom-body" id="terminal"></div>
     </div>
 
     <div class="statusbar">
-      <span>main*</span>
-      <span>TypeScript</span>
+      <span><span class="dot" id="statusDot"></span><span id="statusText">已连接</span></span>
+      <span id="statusRepo">—</span>
       <span class="spacer"></span>
-      <span><span class="kbd">⌘K</span> <span data-i18n="palette">to open command palette</span></span>
-      <span>DeepSeek Harness</span>
+      <span><span class="kbd">⌘K</span> 打开命令面板</span>
+      <span>demoputter 0.3.0</span>
     </div>
   </main>
-
 </div>
 
-<button class="lang-btn" id="langBtn">EN</button>
+<div class="toast" id="toast"></div>
 
-<script>
-/* ================= i18n ================= */
-const I18N = {
-  zh: {
-    files: '文件', commits: '提交', pulls: '拉取请求', issues: '问题',
-    actions: '动作', releases: '发布', settings: '设置',
-    terminal: '终端', problems: '问题', output: '输出', debug: '调试控制台',
-    assistant: '助理', aiTitle: '需要我做什么？',
-    aiSub: '问代码、找 bug、或者提改进建议。',
-    chipExplain: '解释这个文件', chipBugs: '找 bug', chipRefactor: '重构',
-    chipTests: '写测试', chipFeature: '加功能', chipPerf: '优化性能',
-    search: '在仓库里搜索…', aiPlaceholder: '问点什么…',
-    palette: '打开命令面板',
-  },
-  en: {
-    files: 'Files', commits: 'Commits', pulls: 'Pull Requests', issues: 'Issues',
-    actions: 'Actions', releases: 'Releases', settings: 'Settings',
-    terminal: 'Terminal', problems: 'Problems', output: 'Output', debug: 'Debug Console',
-    assistant: 'Assistant', aiTitle: 'How can I help?',
-    aiSub: 'Ask about your code, debug issues, or suggest improvements.',
-    chipExplain: 'Explain this file', chipBugs: 'Find bugs', chipRefactor: 'Refactor',
-    chipTests: 'Write tests', chipFeature: 'Add a feature', chipPerf: 'Improve performance',
-    search: 'Search in repository…', aiPlaceholder: 'Ask anything…',
-    palette: 'to open command palette',
-  }
-};
-let lang = localStorage.getItem('demoputter.lang') || 'zh';
-
-function applyLang() {
-  const dict = I18N[lang];
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const k = el.dataset.i18n;
-    if (dict[k]) el.textContent = dict[k];
-  });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    const k = el.dataset.i18nPlaceholder;
-    if (dict[k]) el.placeholder = dict[k];
-  });
-  document.getElementById('langBtn').textContent = lang === 'zh' ? 'EN' : '中';
-  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
-  localStorage.setItem('demoputter.lang', lang);
-}
-
-/* ================= 文件树 ================= */
-const tree = [
-  { n: 'web', d: true, open: true, kids: [
-    { n: '.next', d: true }, { n: 'node_modules', d: true }, { n: 'public', d: true },
-    { n: 'src', d: true, open: true, kids: [
-      { n: 'app', d: true, open: true, kids: [
-        { n: 'favicon.ico', star: true }, { n: 'globals.css', css: true },
-        { n: 'index.tsx', ts: true, active: true }, { n: 'layout.tsx', ts: true }
-      ]},
-      { n: 'components', d: true }, { n: 'lib', d: true }
-    ]},
-    { n: '.env.local' }, { n: '.gitignore' }, { n: 'next.config.ts', ts: true },
-    { n: 'package.json', json: true }, { n: 'README.md', md: true },
-    { n: 'tailwind.config.ts', ts: true }
-  ]}
-];
-
-const iconFor = (node) => {
-  if (node.d) return { cls: 'icon-folder', ch: '▸' };
-  if (node.star) return { cls: 'icon-star', ch: '★' };
-  if (node.ts) return { cls: 'icon-ts', ch: '◈' };
-  if (node.css) return { cls: 'icon-css', ch: '#' };
-  if (node.json) return { cls: 'icon-json', ch: '{}' };
-  if (node.md) return { cls: 'icon-md', ch: '▤' };
-  return { cls: 'icon-md', ch: '·' };
-};
-
-function renderTree(nodes, container) {
-  nodes.forEach(node => {
-    const ic = iconFor(node);
-    const row = document.createElement('div');
-    row.className = 'ft-row' + (node.active ? ' active' : '');
-    row.innerHTML = `<span class="tw">${node.d ? (node.open ? '▾' : '▸') : ''}</span>
-      <span class="fi ${ic.cls}">${ic.ch}</span><span class="nm">${node.n}</span>`;
-    row.onclick = () => {
-      if (node.d) { node.open = !node.open; container.innerHTML = ''; renderTree(tree, container); }
-    };
-    container.appendChild(row);
-    if (node.d && node.open && node.kids) {
-      const kids = document.createElement('div');
-      kids.className = 'ft-kids';
-      container.appendChild(kids);
-      renderTree(node.kids, kids);
-    }
-  });
-}
-
-/* ================= 代码 ================= */
-const sampleCode = `import { Inter } from "next/font/google";
-import type { Metadata } from "next";
-
-import { Hero } from "@/components/hero";
-import { Features } from "@/components/features";
-
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "demoputter",
-  description: "The developer workspace for modern teams.",
-};
-
-export default function Home() {
-  return (
-    <main className="min-h-screen bg-background">
-      <Hero />
-      <Features />
-    </main>
-  );
-}`;
-
-function highlight(code) {
-  let out = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  out = out.replace(/(&quot;[^&\n]*?&quot;)/g, '<span class="s">$1</span>');
-  out = out.replace(/\b(const|let|var|function|return|import|from|export|default|type|async|await|new|if|else|for|of|in)\b/g, '<span class="k">$1</span>');
-  out = out.replace(/\b(Inter|Metadata|Hero|Features|main|Home)\b/g, '<span class="t">$1</span>');
-  out = out.replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)/g, '$1<span class="a">$2</span>');
-  return out;
-}
-
-/* ================= 启动 ================= */
-function boot() {
-  applyLang();
-
-  document.getElementById('langBtn').onclick = () => {
-    lang = lang === 'zh' ? 'en' : 'zh';
-    applyLang();
-  };
-
-  const lines = sampleCode.split('\n');
-  document.getElementById('gutter').innerHTML = lines.map((_, i) =>
-    i === 15 ? `<span style="color:#2563eb;font-weight:600">${i+1}</span>` : (i + 1)
-  ).join('<br>');
-  document.getElementById('code').innerHTML = highlight(sampleCode);
-
-  renderTree(tree, document.getElementById('fileTree'));
-
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.onclick = () => {
-      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-    };
-  });
-  document.querySelectorAll('.rail-item[data-ws]').forEach(item => {
-    item.onclick = () => {
-      document.querySelectorAll('.rail-item[data-ws]').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-    };
-  });
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.onclick = (e) => {
-      if (e.target.classList.contains('x')) { tab.remove(); return; }
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-    };
-  });
-  document.querySelectorAll('.bt').forEach(tab => {
-    tab.onclick = () => {
-      document.querySelectorAll('.bt').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-    };
-  });
-}
-
-document.addEventListener('DOMContentLoaded', boot);
-</script>
+<script src="app.js"></script>
 </body>
 </html>
