@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+package-lock.json
+
+# build output
+dist/
+build/
+*.spec
+__pycache__/
+*.pyc
+
+# electron
+node_modules/electron/
+out/
+
+# os
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
