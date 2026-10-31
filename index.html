@@ -363,6 +363,10 @@ input, textarea, select { font: inherit; color: inherit; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
     </button>
     <div style="height:8px"></div>
+    <button class="rail-item" id="railLocal" title="本地工作区">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      <span>本地</span>
+    </button>
     <div id="railRepos" style="display:flex;flex-direction:column;align-items:center;"></div>
     <div class="rail-gap"></div>
     <button class="rail-item" id="railRefresh" title="刷新仓库">
@@ -424,6 +428,7 @@ input, textarea, select { font: inherit; color: inherit; }
     <div class="view" id="view-actions"><div class="list-view" id="listActions"></div></div>
     <div class="view" id="view-releases"><div class="list-view" id="listReleases"></div></div>
     <div class="view" id="view-settings"><div class="settings-view" id="viewSettings"></div></div>
+    <div class="view" id="view-local"><div class="settings-view" id="localPanel"></div></div>
 
     <div class="bottom" id="bottom">
       <div class="bottom-tabs">

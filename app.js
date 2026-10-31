@@ -53,6 +53,24 @@ function log(msg, kind = '') {
 
 /* ---------- API ---------- */
 async function api(path, opts = {}) {
+  // 优先走桌面后端代理（避免 WebView 对 file:// 的 CORS 限制）
+  try {
+    const backend = (window.pywebview && window.pywebview.api) ? window.pywebview.api : null;
+    if (backend && typeof backend.gh_request === 'function') {
+      const method = (opts.method || 'GET').toUpperCase();
+      let body = null;
+      if (opts.body) {
+        try { body = JSON.parse(opts.body); } catch { body = null; }
+      }
+      const r = await backend.gh_request(method, path, body);
+      if (!r.ok) throw new Error(r.error || '请求失败');
+      return r.data;
+    }
+  } catch (e) {
+    // 后端代理失败时继续走浏览器直连（如果是网络错误则直接抛）
+    if (e && e.message && !/fetch|network/i.test(e.message)) { /* 继续尝试直连 */ }
+  }
+
   const res = await fetch(API + path, {
     ...opts,
     headers: {
@@ -73,6 +91,11 @@ async function api(path, opts = {}) {
 async function connect(token) {
   S.token = (token || '').trim();
   if (!S.token) throw new Error('令牌为空');
+  // 先把令牌交给 Python 后端（用于代理请求）
+  const backend = (window.pywebview && window.pywebview.api) ? window.pywebview.api : null;
+  if (backend && typeof backend.set_token === 'function') {
+    await backend.set_token(S.token);
+  }
   const me = await api('/user');
   S.user = me;
   localStorage.setItem(LS_TOKEN, S.token);
@@ -254,6 +277,7 @@ function loadView(view) {
   if (view === 'actions') loadActions();
   if (view === 'releases') loadReleases();
   if (view === 'settings') renderSettings();
+  if (view === 'local') renderLocal();
 }
 
 function viewHead(title, sub, buttons = []) {
@@ -490,7 +514,195 @@ function openIssueModal() {
   };
 }
 
-/* ---------- 启动 ---------- */
+/* ================= 本地工作区 ================= */
+const local = {
+  dir: '',
+  isGit: false,
+  branch: '',
+  changed: [],
+  commits: [],
+  remote: '',
+};
+
+function pyApi() {
+  return (window.pywebview && window.pywebview.api) ? window.pywebview.api : null;
+}
+
+async function callPy(name, ...args) {
+  const api = pyApi();
+  if (!api || typeof api[name] !== 'function') {
+    throw new Error('桌面后端未就绪（请在 demoputter 应用里使用本地功能）');
+  }
+  return await api[name](...args);
+}
+
+function renderLocal() {
+  const c = $('localPanel');
+  c.innerHTML = `
+    <h2>本地工作区</h2>
+    <p class="desc">把任意本地文件夹变成 git 仓库、推送改动、构建并发布。</p>
+    <div class="set-card">
+      <h3>文件夹</h3>
+      <div class="set-field">
+        <label>当前目录<div class="sub" id="localDir">${esc(local.dir || '还没有选择')}</div></label>
+        <button class="btn-primary" id="btnPickDir">选择文件夹</button>
+      </div>
+      <div class="set-field">
+        <label>Git 仓库<div class="sub" id="localGitInfo">${local.isGit ? '✓ 已是 git 仓库' : '✗ 不是 git 仓库'}</div></label>
+        <button class="btn-ghost" id="btnGitInit" ${local.isGit ? 'disabled' : ''}>初始化仓库</button>
+      </div>
+      <div class="set-field">
+        <label>远程地址<div class="sub" id="localRemote">${esc(local.remote || '未配置')}</div></label>
+        <button class="btn-ghost" id="btnSetRemote">设置远程</button>
+      </div>
+    </div>
+    <div class="set-card">
+      <h3>改动</h3>
+      <div class="hint" id="localChanges">${local.changed.length ? local.changed.length + ' 个文件有改动' : '没有改动'}</div>
+      <div class="set-field">
+        <label>提交信息<input class="set-input" id="localMsg" placeholder="描述这次改动" style="width:260px"></label>
+        <button class="btn-primary" id="btnCommitPush">提交并推送</button>
+      </div>
+      <div class="set-field">
+        <label>最新提交<div class="sub" id="localLastCommit">—</div></label>
+        <button class="btn-ghost" id="btnGitLog">刷新历史</button>
+      </div>
+    </div>
+    <div class="set-card">
+      <h3>构建与发布</h3>
+      <div class="set-field">
+        <label>构建命令<div class="sub">留空则自动识别（npm run build / cargo build 等）</div></label>
+        <input class="set-input" id="buildCmd" placeholder="自动识别">
+      </div>
+      <div class="set-field">
+        <label>构建<div class="sub" id="buildOut">还没有构建</div></label>
+        <button class="btn-primary" id="btnBuild">开始构建</button>
+      </div>
+      <div class="set-field">
+        <label>版本号<input class="set-input" id="relTag" placeholder="v0.1.0" value="v0.1.0"></label>
+        <button class="btn-primary" id="btnRelease">创建发布</button>
+      </div>
+      <div class="set-field">
+        <label>灰度分支<div class="sub">从当前分支拉一条 canary 并推送</div></label>
+        <button class="btn-ghost" id="btnCanary">创建灰度</button>
+      </div>
+    </div>`;
+
+  $('btnPickDir').onclick = async () => {
+    try {
+      const r = await callPy('pick_dir');
+      if (!r.ok) return;
+      local.dir = r.path;
+      await refreshLocal();
+      renderLocal();
+    } catch (e) { toast(e.message, 'err'); }
+  };
+
+  $('btnGitInit').onclick = async () => {
+    if (!local.dir) return toast('先选一个文件夹', 'err');
+    try {
+      const r = await callPy('git_init', local.dir);
+      toast(r.message || '已初始化', r.ok ? 'ok' : 'err');
+      await refreshLocal();
+      renderLocal();
+    } catch (e) { toast(e.message, 'err'); }
+  };
+
+  $('btnSetRemote').onclick = async () => {
+    if (!local.dir) return toast('先选一个文件夹', 'err');
+    const url = prompt('远程仓库地址（git@github.com:user/repo.git 或 https://...）', local.remote || '');
+    if (!url) return;
+    try {
+      const r = await callPy('git_set_remote', local.dir, url);
+      toast(r.message || '已设置', r.ok ? 'ok' : 'err');
+      await refreshLocal();
+      renderLocal();
+    } catch (e) { toast(e.message, 'err'); }
+  };
+
+  $('btnCommitPush').onclick = async () => {
+    if (!local.dir) return toast('先选一个文件夹', 'err');
+    const msg = $('localMsg').value.trim() || 'update';
+    try {
+      const r = await callPy('git_add_commit_push', local.dir, msg);
+      toast(r.ok ? '已提交并推送' : ('失败：' + (r.message || '')), r.ok ? 'ok' : 'err');
+      await refreshLocal();
+      renderLocal();
+    } catch (e) { toast(e.message, 'err'); }
+  };
+
+  $('btnGitLog').onclick = async () => {
+    try {
+      const r = await callPy('git_log', local.dir);
+      local.commits = r.commits || [];
+      $('localLastCommit').textContent = local.commits[0]
+        ? `${local.commits[0].sha} ${local.commits[0].msg}` : '没有提交';
+      toast('已刷新', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  };
+
+  $('btnBuild').onclick = async () => {
+    if (!local.dir) return toast('先选一个文件夹', 'err');
+    const cmd = $('buildCmd').value.trim();
+    $('buildOut').textContent = '构建中…';
+    try {
+      const r = await callPy('build', local.dir, cmd);
+      $('buildOut').textContent = (r.ok ? '✓ ' : '✗ ') + r.output.slice(0, 200);
+      toast(r.ok ? '构建成功' : '构建失败', r.ok ? 'ok' : 'err');
+    } catch (e) {
+      $('buildOut').textContent = e.message;
+      toast(e.message, 'err');
+    }
+  };
+
+  $('btnRelease').onclick = async () => {
+    if (!S.repo) return toast('先去远端选一个仓库', 'err');
+    const tag = $('relTag').value.trim();
+    if (!tag) return toast('填个版本号', 'err');
+    try {
+      const r = await callPy('create_release', S.token, S.repo.owner, S.repo.name, tag, tag, `由 demoputter 创建 ${tag}`);
+      if (r.ok) {
+        toast(`发布 ${tag} 已创建`, 'ok');
+        log(`创建发布 ${tag}`, 'ok');
+      } else {
+        toast('发布失败：' + (r.error || ''), 'err');
+      }
+    } catch (e) { toast(e.message, 'err'); }
+  };
+
+  $('btnCanary').onclick = async () => {
+    if (!local.dir) return toast('先选一个文件夹', 'err');
+    try {
+      const r = await callPy('create_canary', local.dir, 'canary');
+      toast(r.ok ? '灰度分支已创建' : ('失败：' + (r.message || '')), r.ok ? 'ok' : 'err');
+      if (r.ok) log('创建灰度分支 canary', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  };
+
+  // 初次进入时刷新一次状态
+  if (local.dir) refreshLocal().then(() => {
+    const lc = $('localLastCommit');
+    if (lc && local.commits[0]) lc.textContent = `${local.commits[0].sha} ${local.commits[0].msg}`;
+  });
+}
+
+async function refreshLocal() {
+  if (!local.dir) return;
+  try {
+    const st = await callPy('git_status', local.dir);
+    local.isGit = st.isGit;
+    local.branch = st.branch || '';
+    local.changed = st.changed || [];
+    const rm = await callPy('git_remote', local.dir);
+    local.remote = rm.remote || '';
+    const lg = await callPy('git_log', local.dir, 5);
+    local.commits = lg.commits || [];
+  } catch (e) {
+    log('本地状态刷新失败：' + e.message, 'err');
+  }
+}
+
+/* ================= 启动 ================= */
 function boot() {
   $('gate').classList.remove('hidden');
 
@@ -514,6 +726,7 @@ function boot() {
   $('repoSwitch').onclick = (e) => { e.stopPropagation(); showRepoDropdown(); };
   $('railRefresh').onclick = () => loadRepos();
   $('railSettings').onclick = () => loadView('settings');
+  $('railLocal').onclick = () => loadView('local');
   $('ftRefresh').onclick = () => S.treePath !== undefined && loadTree(S.treePath);
   $('btnCommit').onclick = commitFile;
   $('btnSave').onclick = () => { if (S.file) S.file.content = $('code').value; toast('已暂存（提交才会写入仓库）', 'ok'); };
