@@ -6,22 +6,26 @@
 <title>demoputter</title>
 <style>
 :root {
-  --bg: #0a0c10;
-  --bg-2: #0e1116;
-  --bg-3: #14181f;
-  --panel: #10141a;
-  --line: #1e232c;
-  --line-2: #2a3039;
-  --text: #e6edf3;
-  --dim: #8b949e;
-  --dim-2: #5c6470;
-  --blue: #3b82f6;
-  --blue-soft: rgba(59,130,246,.13);
-  --green: #3fb950;
-  --orange: #d29922;
-  --purple: #a371f7;
-  --cyan: #39c5cf;
+  --bg: #f6f8fb;
+  --bg-2: #ffffff;
+  --bg-3: #f0f4fa;
+  --panel: #ffffff;
+  --line: #e4e9f2;
+  --line-2: #d5dce8;
+  --text: #1e2430;
+  --dim: #65718a;
+  --dim-2: #98a2b8;
+  --blue: #2563eb;
+  --blue-hover: #1d4fd7;
+  --blue-soft: #eaf1ff;
+  --blue-soft-2: #dbe8ff;
+  --green: #16a34a;
+  --orange: #d97706;
+  --purple: #7c3aed;
+  --cyan: #0891b2;
+  --red: #dc2626;
   --mono: "SF Mono", "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+  --shadow: 0 1px 2px rgba(16,24,40,.04), 0 4px 12px rgba(16,24,40,.04);
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
@@ -34,238 +38,250 @@ body {
 }
 button { font: inherit; color: inherit; border: none; background: none; cursor: pointer; }
 input { font: inherit; color: inherit; }
-::-webkit-scrollbar { width: 9px; height: 9px; }
-::-webkit-scrollbar-thumb { background: #2a3039; border-radius: 9px; border: 2px solid transparent; background-clip: padding-box; }
-::-webkit-scrollbar-thumb:hover { background: #3a4250; background-clip: padding-box; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #cfd7e4; border-radius: 10px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: #b6c1d4; background-clip: padding-box; }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* ====== 总布局 ====== */
 .app { display: flex; height: 100vh; }
 
 /* ====== 一级：窄条 ====== */
 .rail {
-  width: 72px; flex-shrink: 0;
+  width: 76px; flex-shrink: 0;
   background: var(--bg-2);
   border-right: 1px solid var(--line);
   display: flex; flex-direction: column; align-items: center;
-  padding: 12px 0 10px;
+  padding: 14px 0 10px;
 }
-.logo { font-weight: 800; font-size: 15px; letter-spacing: -.6px; color: var(--text); margin-bottom: 20px; }
+.logo { font-weight: 800; font-size: 14px; letter-spacing: -.5px; color: var(--text); margin-bottom: 22px; text-align: center; line-height: 1.1; }
 .logo b { color: var(--blue); }
 .rail-item {
-  width: 44px; height: 44px;
+  width: 46px; height: 46px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px; border-radius: 10px; margin-bottom: 4px;
+  gap: 3px; border-radius: 11px; margin-bottom: 5px;
   color: var(--dim-2); transition: background .16s, color .16s;
   position: relative;
 }
-.rail-item:hover { background: rgba(255,255,255,.05); color: var(--dim); }
+.rail-item:hover { background: var(--bg-3); color: var(--dim); }
 .rail-item.active { background: var(--blue-soft); color: var(--blue); }
 .rail-item.active::before {
-  content: ""; position: absolute; left: -12px; top: 10px; bottom: 10px;
-  width: 2px; border-radius: 2px; background: var(--blue);
+  content: ""; position: absolute; left: -13px; top: 11px; bottom: 11px;
+  width: 2.5px; border-radius: 3px; background: var(--blue);
 }
-.rail-item svg { width: 19px; height: 19px; }
+.rail-item svg { width: 20px; height: 20px; }
 .rail-item span { font-size: 9px; letter-spacing: .2px; }
 .rail-gap { flex: 1; }
 
 /* ====== 二级：侧栏 ====== */
 .side {
-  width: 248px; flex-shrink: 0;
+  width: 252px; flex-shrink: 0;
   background: var(--bg-2);
   border-right: 1px solid var(--line);
   display: flex; flex-direction: column;
   min-height: 0;
 }
-.side-top { padding: 12px 12px 8px; }
+.side-top { padding: 14px 12px 10px; }
 .repo-switch {
   display: flex; align-items: center; gap: 7px;
-  font-size: 14px; font-weight: 600; padding: 4px 2px;
+  font-size: 14px; font-weight: 600; padding: 5px 6px;
   width: 100%; text-align: left; border-radius: 8px;
 }
-.repo-switch:hover { background: rgba(255,255,255,.04); }
+.repo-switch:hover { background: var(--bg-3); }
 .repo-switch .org { color: var(--text); }
 .repo-switch .sep { color: var(--dim-2); }
 .repo-switch .arrow { margin-left: auto; color: var(--dim-2); font-size: 10px; }
-.search-wrap { margin-top: 8px; position: relative; }
+.search-wrap { margin-top: 9px; position: relative; }
 .search-wrap input {
   width: 100%; background: var(--bg-3); border: 1px solid var(--line);
-  border-radius: 8px; padding: 6px 10px 6px 28px; font-size: 12px; outline: none;
+  border-radius: 9px; padding: 7px 10px 7px 29px; font-size: 12px; outline: none;
+  transition: border-color .18s, box-shadow .18s;
 }
-.search-wrap input:focus { border-color: var(--blue); }
+.search-wrap input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.10); background: #fff; }
 .search-wrap::before {
-  content: "⌕"; position: absolute; left: 9px; top: 4px; color: var(--dim-2); font-size: 14px;
+  content: "⌕"; position: absolute; left: 10px; top: 4px; color: var(--dim-2); font-size: 14px;
 }
-.side-nav { flex: 1; overflow-y: auto; padding: 6px 8px 12px; min-height: 0; }
+.side-nav { flex: 1; overflow-y: auto; padding: 8px 8px 12px; min-height: 0; }
 .nav-item {
   display: flex; align-items: center; gap: 9px;
-  padding: 7px 10px; border-radius: 8px; width: 100%; text-align: left;
+  padding: 8px 10px; border-radius: 9px; width: 100%; text-align: left;
   color: var(--dim); font-size: 13px; margin-bottom: 1px;
   transition: background .14s, color .14s;
 }
-.nav-item:hover { background: rgba(255,255,255,.045); color: var(--text); }
-.nav-item.active { background: var(--blue-soft); color: #8ab4f8; font-weight: 500; }
-.nav-item .ico { width: 16px; text-align: center; opacity: .8; font-size: 13px; flex-shrink: 0; }
+.nav-item:hover { background: var(--bg-3); color: var(--text); }
+.nav-item.active { background: var(--blue-soft); color: var(--blue); font-weight: 600; }
+.nav-item .ico { width: 16px; text-align: center; opacity: .85; font-size: 13px; flex-shrink: 0; }
 .nav-item .cnt {
-  margin-left: auto; font-size: 10.5px; background: #262d38; color: var(--dim);
-  padding: 1px 6px; border-radius: 99px; min-width: 20px; text-align: center;
+  margin-left: auto; font-size: 10.5px; background: var(--bg-3); color: var(--dim);
+  padding: 1px 7px; border-radius: 99px; min-width: 22px; text-align: center; border: 1px solid var(--line);
 }
+.nav-item.active .cnt { background: #fff; color: var(--blue); border-color: var(--blue-soft-2); }
 
-/* ====== 三级：主区 ====== */
+/* ====== 主区 ====== */
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
 
-/* 标签页 */
 .tabs {
-  height: 40px; flex-shrink: 0; display: flex; align-items: stretch;
+  height: 42px; flex-shrink: 0; display: flex; align-items: stretch;
   background: var(--bg-2); border-bottom: 1px solid var(--line);
   overflow-x: auto; overflow-y: hidden;
 }
 .tabs::-webkit-scrollbar { height: 0; }
 .tab {
   display: flex; align-items: center; gap: 7px;
-  padding: 0 13px; font-size: 12px; color: var(--dim);
+  padding: 0 14px; font-size: 12.5px; color: var(--dim);
   border-right: 1px solid var(--line); white-space: nowrap;
   position: relative; transition: background .14s, color .14s;
 }
-.tab:hover { background: rgba(255,255,255,.03); color: var(--text); }
-.tab.active { background: var(--bg); color: var(--text); }
+.tab:hover { background: var(--bg-3); color: var(--text); }
+.tab.active { background: #fff; color: var(--text); font-weight: 600; }
 .tab.active::after {
   content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--blue);
 }
 .tab .ftype { font-size: 10px; font-weight: 700; flex-shrink: 0; }
-.tab .x { opacity: 0; font-size: 11px; padding: 1px 4px; border-radius: 4px; }
-.tab:hover .x, .tab.active .x { opacity: .55; }
-.tab .x:hover { opacity: 1; background: rgba(255,255,255,.09); }
-.tab-add { display: flex; align-items: center; padding: 0 14px; color: var(--dim-2); font-size: 16px; }
-.tab-add:hover { color: var(--text); }
+.tab .x { opacity: 0; font-size: 11px; padding: 1px 5px; border-radius: 4px; }
+.tab:hover .x, .tab.active .x { opacity: .5; }
+.tab .x:hover { opacity: 1; background: var(--bg-3); }
+.tab-add { display: flex; align-items: center; padding: 0 15px; color: var(--dim-2); font-size: 17px; }
+.tab-add:hover { color: var(--blue); }
 
-/* 主内容：编辑器 + 右侧文件树 */
 .workspace { flex: 1; display: flex; min-height: 0; }
-
-/* 编辑器区 */
 .editor-area { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .editor-bar {
-  height: 38px; flex-shrink: 0; display: flex; align-items: center; gap: 10px;
-  padding: 0 14px; border-bottom: 1px solid var(--line); background: var(--bg);
+  height: 40px; flex-shrink: 0; display: flex; align-items: center; gap: 10px;
+  padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--bg-2);
 }
 .breadcrumb { font-size: 12px; color: var(--dim); }
-.breadcrumb .f { color: var(--text); }
-.editor-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.breadcrumb .f { color: var(--text); font-weight: 500; }
+.editor-actions { margin-left: auto; display: flex; gap: 5px; align-items: center; }
 .mini-btn {
-  font-size: 11.5px; padding: 3px 10px; border-radius: 6px;
+  font-size: 11.5px; padding: 4px 11px; border-radius: 7px;
   color: var(--dim); border: 1px solid transparent;
 }
-.mini-btn:hover { background: rgba(255,255,255,.05); color: var(--text); }
-.mini-btn.primary { background: var(--blue-soft); color: #8ab4f8; }
+.mini-btn:hover { background: var(--bg-3); color: var(--text); }
+.mini-btn.primary { background: var(--blue-soft); color: var(--blue); }
 
-.code-scroll { flex: 1; overflow: auto; display: flex; min-height: 0; }
+.code-scroll { flex: 1; overflow: auto; display: flex; min-height: 0; background: #fff; }
 .gutter {
-  width: 52px; flex-shrink: 0; background: var(--bg);
-  color: #3b424d; font: 12.5px/1.65 var(--mono); text-align: right;
-  padding: 12px 12px 12px 0; user-select: none; border-right: 1px solid var(--line);
+  width: 54px; flex-shrink: 0; background: #fbfcfe;
+  color: #b6c0d0; font: 12.5px/1.68 var(--mono); text-align: right;
+  padding: 14px 12px 14px 0; user-select: none; border-right: 1px solid var(--line);
 }
 .code {
-  flex: 1; margin: 0; padding: 12px 18px; overflow: visible;
-  font: 12.5px/1.65 var(--mono); color: #c9d1d9; white-space: pre; tab-size: 2;
+  flex: 1; margin: 0; padding: 14px 20px; overflow: visible;
+  font: 12.5px/1.68 var(--mono); color: #24292f; white-space: pre; tab-size: 2;
 }
-.k { color: #ff7b72; } .s { color: #a5d6ff; } .c { color: #6a737d; font-style: italic; }
-.t { color: #7ee787; } .a { color: #d2a8ff; }
+.k { color: #cf222e; } .s { color: #0a3069; } .c { color: #6e7781; font-style: italic; }
+.t { color: #953800; } .a { color: #116329; } .fn { color: #8250df; }
 
 /* 右侧文件树 */
 .filetree {
-  width: 260px; flex-shrink: 0; border-left: 1px solid var(--line);
+  width: 264px; flex-shrink: 0; border-left: 1px solid var(--line);
   background: var(--bg-2); display: flex; flex-direction: column; min-height: 0;
 }
 .ft-head {
-  height: 38px; flex-shrink: 0; display: flex; align-items: center; gap: 6px;
-  padding: 0 12px; border-bottom: 1px solid var(--line);
-  font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dim-2);
+  height: 40px; flex-shrink: 0; display: flex; align-items: center; gap: 6px;
+  padding: 0 14px; border-bottom: 1px solid var(--line);
+  font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dim-2); font-weight: 600;
 }
-.ft-head .acts { margin-left: auto; display: flex; gap: 2px; }
-.ft-body { flex: 1; overflow: auto; padding: 6px 6px 12px; font-size: 12.5px; }
+.ft-head .acts { margin-left: auto; display: flex; gap: 1px; }
+.ft-body { flex: 1; overflow: auto; padding: 8px 6px 12px; font-size: 12.5px; }
 .ft-row {
-  display: flex; align-items: center; gap: 5px; padding: 3.5px 8px;
-  border-radius: 6px; cursor: pointer; white-space: nowrap; color: var(--dim);
+  display: flex; align-items: center; gap: 5px; padding: 4px 8px;
+  border-radius: 7px; cursor: pointer; white-space: nowrap; color: var(--dim);
+  transition: background .12s, color .12s;
 }
-.ft-row:hover { background: rgba(255,255,255,.04); color: var(--text); }
-.ft-row.active { background: var(--blue-soft); color: #8ab4f8; }
-.ft-row .tw { width: 10px; color: var(--dim-2); font-size: 9px; flex-shrink: 0; }
+.ft-row:hover { background: var(--bg-3); color: var(--text); }
+.ft-row.active { background: var(--blue-soft); color: var(--blue); font-weight: 600; }
+.ft-row .tw { width: 11px; color: var(--dim-2); font-size: 9px; flex-shrink: 0; }
 .ft-row .fi { font-size: 11px; flex-shrink: 0; width: 14px; text-align: center; }
 .ft-row .nm { overflow: hidden; text-overflow: ellipsis; }
-.ft-kids { padding-left: 15px; }
-.icon-ts { color: #3178c6; } .icon-md { color: var(--dim); } .icon-json { color: var(--orange); }
-.icon-css { color: var(--purple); } .icon-folder { color: #8b949e; } .icon-star { color: var(--orange); }
+.ft-kids { padding-left: 16px; }
+.icon-ts { color: #2563eb; } .icon-md { color: var(--dim); } .icon-json { color: var(--orange); }
+.icon-css { color: var(--purple); } .icon-folder { color: #8b96ab; } .icon-star { color: var(--orange); }
 
 /* 底部面板 */
 .bottom {
-  height: 168px; flex-shrink: 0; border-top: 1px solid var(--line);
+  height: 176px; flex-shrink: 0; border-top: 1px solid var(--line);
   background: var(--bg-2); display: flex; flex-direction: column;
 }
-.bottom-tabs { height: 34px; flex-shrink: 0; display: flex; align-items: stretch; border-bottom: 1px solid var(--line); }
+.bottom-tabs { height: 36px; flex-shrink: 0; display: flex; align-items: stretch; border-bottom: 1px solid var(--line); }
 .bt {
-  display: flex; align-items: center; gap: 6px; padding: 0 13px;
+  display: flex; align-items: center; gap: 6px; padding: 0 14px;
   font-size: 11.5px; color: var(--dim-2); border-right: 1px solid var(--line);
   letter-spacing: .2px;
 }
-.bt.active { color: var(--text); background: var(--bg); box-shadow: inset 0 2px 0 var(--blue); }
-.bt .cnt { font-size: 10px; background: #262d38; padding: 0 5px; border-radius: 99px; color: var(--dim); }
-.bottom-right { margin-left: auto; display: flex; align-items: center; gap: 8px; padding-right: 8px; }
+.bt:hover { background: var(--bg-3); }
+.bt.active { color: var(--text); font-weight: 600; background: #fff; box-shadow: inset 0 2px 0 var(--blue); }
+.bt .cnt { font-size: 10px; background: var(--bg-3); padding: 0 6px; border-radius: 99px; color: var(--dim); }
+.bottom-right { margin-left: auto; display: flex; align-items: center; gap: 7px; padding-right: 10px; }
 .sel {
-  background: var(--bg-3); border: 1px solid var(--line-2); border-radius: 6px;
-  padding: 3px 8px; font-size: 11px; color: var(--dim);
+  background: var(--bg-3); border: 1px solid var(--line); border-radius: 7px;
+  padding: 3px 9px; font-size: 11px; color: var(--dim);
 }
-.bottom-body { flex: 1; overflow: auto; padding: 10px 14px; font: 12px/1.62 var(--mono); min-height: 0; }
+.bottom-body { flex: 1; overflow: auto; padding: 11px 16px; font: 12px/1.65 var(--mono); min-height: 0; }
 .term-line { color: var(--dim); }
-.term-line .prompt { color: var(--green); }
-.term-line .path { color: #8ab4f8; }
+.term-line .prompt { color: var(--green); font-weight: 600; }
+.term-line .path { color: var(--blue); }
 .term-line .ok { color: var(--green); }
 .term-line .info { color: var(--cyan); }
 .term-line .warn { color: var(--orange); }
 
 /* 右侧助理面板 */
 .assistant {
-  width: 300px; flex-shrink: 0; border-left: 1px solid var(--line);
+  width: 312px; flex-shrink: 0; border-left: 1px solid var(--line);
   background: var(--bg-2); display: flex; flex-direction: column;
 }
 .as-head {
-  height: 38px; flex-shrink: 0; display: flex; align-items: center; gap: 8px;
-  padding: 0 14px; border-bottom: 1px solid var(--line);
-  font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dim-2);
+  height: 40px; flex-shrink: 0; display: flex; align-items: center; gap: 8px;
+  padding: 0 15px; border-bottom: 1px solid var(--line);
+  font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dim-2); font-weight: 600;
 }
-.as-body { flex: 1; overflow: auto; padding: 14px; min-height: 0; }
-.as-hero { text-align: center; padding: 18px 4px 14px; }
-.as-hero .spark { font-size: 26px; color: var(--blue); margin-bottom: 8px; }
-.as-hero h3 { margin: 0 0 4px; font-size: 14px; }
-.as-hero p { margin: 0; font-size: 11.5px; color: var(--dim-2); line-height: 1.5; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 14px; }
+.as-body { flex: 1; overflow: auto; padding: 16px; min-height: 0; }
+.as-hero { text-align: center; padding: 22px 4px 16px; }
+.as-hero .spark { font-size: 26px; color: var(--blue); margin-bottom: 10px; }
+.as-hero h3 { margin: 0 0 5px; font-size: 15px; }
+.as-hero p { margin: 0; font-size: 11.5px; color: var(--dim-2); line-height: 1.55; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 16px; }
 .chip {
-  font-size: 11px; padding: 5px 10px; border-radius: 99px;
-  border: 1px solid var(--line-2); color: var(--dim); background: var(--bg-3);
+  font-size: 11px; padding: 6px 11px; border-radius: 99px;
+  border: 1px solid var(--line); color: var(--dim); background: var(--bg-3);
+  transition: border-color .15s, color .15s, background .15s;
 }
-.chip:hover { border-color: var(--blue); color: var(--text); }
+.chip:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); }
 .as-input {
-  flex-shrink: 0; display: flex; gap: 7px; padding: 10px 12px; border-top: 1px solid var(--line);
+  flex-shrink: 0; display: flex; gap: 8px; padding: 11px 13px; border-top: 1px solid var(--line);
 }
 .as-input input {
-  flex: 1; background: var(--bg-3); border: 1px solid var(--line-2);
-  border-radius: 8px; padding: 7px 10px; font-size: 12px; outline: none;
+  flex: 1; background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 9px; padding: 8px 11px; font-size: 12px; outline: none;
+  transition: border-color .18s, box-shadow .18s, background .18s;
 }
-.as-input input:focus { border-color: var(--blue); }
+.as-input input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.10); background: #fff; }
 .as-send {
-  width: 30px; border-radius: 8px; background: var(--blue); color: #fff;
+  width: 34px; border-radius: 9px; background: var(--blue); color: #fff;
   display: flex; align-items: center; justify-content: center; font-size: 13px;
+  transition: background .15s;
 }
+.as-send:hover { background: var(--blue-hover); }
 
 /* 状态栏 */
 .statusbar {
-  height: 24px; flex-shrink: 0; display: flex; align-items: center; gap: 14px;
-  padding: 0 14px; background: var(--bg-2); border-top: 1px solid var(--line);
+  height: 26px; flex-shrink: 0; display: flex; align-items: center; gap: 15px;
+  padding: 0 16px; background: var(--bg-2); border-top: 1px solid var(--line);
   font-size: 10.5px; color: var(--dim-2);
 }
 .statusbar .kbd {
-  background: #232a34; border-radius: 4px; padding: 0 5px; font-size: 10px; color: #8ab4f8;
+  background: var(--bg-3); border: 1px solid var(--line); border-radius: 4px;
+  padding: 0 5px; font-size: 10px; color: var(--blue);
 }
 .statusbar .spacer { flex: 1; }
+
+/* 语言切换 */
+.lang-btn {
+  position: fixed; right: 14px; bottom: 34px; z-index: 100;
+  background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 99px;
+  padding: 5px 13px; font-size: 11px; color: var(--dim); box-shadow: var(--shadow);
+}
+.lang-btn:hover { border-color: var(--blue); color: var(--blue); }
 </style>
 </head>
 <body>
@@ -273,7 +289,7 @@ input { font: inherit; color: inherit; }
 
   <nav class="rail">
     <div class="logo">demo<b>putter</b></div>
-    <button class="rail-item" title="设置">
+    <button class="rail-item" title="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
     </button>
     <div style="height:10px"></div>
@@ -302,7 +318,7 @@ input { font: inherit; color: inherit; }
       <span>design</span>
     </button>
     <div class="rail-gap"></div>
-    <button class="rail-item" title="添加工作区">
+    <button class="rail-item" title="Add workspace">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
     </button>
   </nav>
@@ -314,17 +330,17 @@ input { font: inherit; color: inherit; }
         <span class="arrow">▾</span>
       </button>
       <div class="search-wrap">
-        <input placeholder="Search in repository…" id="sideSearch">
+        <input placeholder="Search in repository…" data-i18n-placeholder="search">
       </div>
     </div>
     <div class="side-nav" id="sideNav">
-      <button class="nav-item active" data-view="files"><span class="ico">▤</span>Files</button>
-      <button class="nav-item" data-view="commits"><span class="ico">◷</span>Commits</button>
-      <button class="nav-item" data-view="pulls"><span class="ico">⇄</span>Pull Requests<span class="cnt">3</span></button>
-      <button class="nav-item" data-view="issues"><span class="ico">◎</span>Issues<span class="cnt">12</span></button>
-      <button class="nav-item" data-view="actions"><span class="ico">▶</span>Actions</button>
-      <button class="nav-item" data-view="releases"><span class="ico">◇</span>Releases</button>
-      <button class="nav-item" data-view="settings"><span class="ico">⚙</span>Settings</button>
+      <button class="nav-item active" data-view="files"><span class="ico">▤</span><span data-i18n="files">Files</span></button>
+      <button class="nav-item" data-view="commits"><span class="ico">◷</span><span data-i18n="commits">Commits</span></button>
+      <button class="nav-item" data-view="pulls"><span class="ico">⇄</span><span data-i18n="pulls">Pull Requests</span><span class="cnt">3</span></button>
+      <button class="nav-item" data-view="issues"><span class="ico">◎</span><span data-i18n="issues">Issues</span><span class="cnt">12</span></button>
+      <button class="nav-item" data-view="actions"><span class="ico">▶</span><span data-i18n="actions">Actions</span></button>
+      <button class="nav-item" data-view="releases"><span class="ico">◇</span><span data-i18n="releases">Releases</span></button>
+      <button class="nav-item" data-view="settings"><span class="ico">⚙</span><span data-i18n="settings">Settings</span></button>
     </div>
   </aside>
 
@@ -356,11 +372,11 @@ input { font: inherit; color: inherit; }
       </div>
 
       <div class="filetree">
-        <div class="ft-head">Files
+        <div class="ft-head"><span data-i18n="files">Files</span>
           <div class="acts">
-            <button class="mini-btn" title="下载">⤓</button>
-            <button class="mini-btn" title="新建">⊞</button>
-            <button class="mini-btn" title="更多">⋯</button>
+            <button class="mini-btn" title="Download">⤓</button>
+            <button class="mini-btn" title="New file">⊞</button>
+            <button class="mini-btn" title="More">⋯</button>
           </div>
         </div>
         <div class="ft-body" id="fileTree"></div>
@@ -369,13 +385,13 @@ input { font: inherit; color: inherit; }
 
     <div class="bottom">
       <div class="bottom-tabs">
-        <div class="bt active">Terminal</div>
-        <div class="bt">Problems <span class="cnt">0</span></div>
-        <div class="bt">Output</div>
-        <div class="bt">Debug Console</div>
+        <div class="bt active" data-i18n="terminal">Terminal</div>
+        <div class="bt"><span data-i18n="problems">Problems</span> <span class="cnt">0</span></div>
+        <div class="bt" data-i18n="output">Output</div>
+        <div class="bt" data-i18n="debug">Debug Console</div>
         <div class="bottom-right">
           <span class="sel">zsh ▾</span>
-          <span class="sel">Assistant ▾</span>
+          <span class="sel" data-i18n="assistant">Assistant</span>
         </div>
       </div>
       <div class="bottom-body" id="terminal">
@@ -398,57 +414,94 @@ input { font: inherit; color: inherit; }
       <span>main*</span>
       <span>TypeScript</span>
       <span class="spacer"></span>
-      <span><span class="kbd">⌘K</span> to open command palette</span>
-      <span>Claude 3.5 Sonnet</span>
+      <span><span class="kbd">⌘K</span> <span data-i18n="palette">to open command palette</span></span>
+      <span>DeepSeek Harness</span>
     </div>
   </main>
 
   <aside class="assistant">
-    <div class="as-head">Assistant</div>
+    <div class="as-head" data-i18n="assistant">Assistant</div>
     <div class="as-body">
       <div class="as-hero">
         <div class="spark">✦</div>
-        <h3>How can I help?</h3>
-        <p>Ask about your code, debug issues,<br>or suggest improvements.</p>
+        <h3 data-i18n="aiTitle">How can I help?</h3>
+        <p data-i18n="aiSub">Ask about your code, debug issues, or suggest improvements.</p>
         <div class="chips">
-          <button class="chip">Explain this file</button>
-          <button class="chip">Find bugs</button>
-          <button class="chip">Refactor</button>
-          <button class="chip">Write tests</button>
-          <button class="chip">Add a feature</button>
-          <button class="chip">Improve performance</button>
+          <button class="chip" data-i18n="chipExplain">Explain this file</button>
+          <button class="chip" data-i18n="chipBugs">Find bugs</button>
+          <button class="chip" data-i18n="chipRefactor">Refactor</button>
+          <button class="chip" data-i18n="chipTests">Write tests</button>
+          <button class="chip" data-i18n="chipFeature">Add a feature</button>
+          <button class="chip" data-i18n="chipPerf">Improve performance</button>
         </div>
       </div>
     </div>
     <div class="as-input">
-      <input placeholder="Ask anything…">
-      <button class="as-send">➤</button>
+      <input placeholder="Ask anything…" id="aiInput" data-i18n-placeholder="aiPlaceholder">
+      <button class="as-send" id="aiSend">➤</button>
     </div>
   </aside>
 
 </div>
 
+<button class="lang-btn" id="langBtn">EN</button>
+
 <script>
+/* ================= i18n ================= */
+const I18N = {
+  zh: {
+    files: '文件', commits: '提交', pulls: '拉取请求', issues: '问题',
+    actions: '动作', releases: '发布', settings: '设置',
+    terminal: '终端', problems: '问题', output: '输出', debug: '调试控制台',
+    assistant: '助理', aiTitle: '需要我做什么？',
+    aiSub: '问代码、找 bug、或者提改进建议。',
+    chipExplain: '解释这个文件', chipBugs: '找 bug', chipRefactor: '重构',
+    chipTests: '写测试', chipFeature: '加功能', chipPerf: '优化性能',
+    search: '在仓库里搜索…', aiPlaceholder: '问点什么…',
+    palette: '打开命令面板',
+  },
+  en: {
+    files: 'Files', commits: 'Commits', pulls: 'Pull Requests', issues: 'Issues',
+    actions: 'Actions', releases: 'Releases', settings: 'Settings',
+    terminal: 'Terminal', problems: 'Problems', output: 'Output', debug: 'Debug Console',
+    assistant: 'Assistant', aiTitle: 'How can I help?',
+    aiSub: 'Ask about your code, debug issues, or suggest improvements.',
+    chipExplain: 'Explain this file', chipBugs: 'Find bugs', chipRefactor: 'Refactor',
+    chipTests: 'Write tests', chipFeature: 'Add a feature', chipPerf: 'Improve performance',
+    search: 'Search in repository…', aiPlaceholder: 'Ask anything…',
+    palette: 'to open command palette',
+  }
+};
+let lang = localStorage.getItem('demoputter.lang') || 'zh';
+
+function applyLang() {
+  const dict = I18N[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.dataset.i18n;
+    if (dict[k]) el.textContent = dict[k];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const k = el.dataset.i18nPlaceholder;
+    if (dict[k]) el.placeholder = dict[k];
+  });
+  document.getElementById('langBtn').textContent = lang === 'zh' ? 'EN' : '中';
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  localStorage.setItem('demoputter.lang', lang);
+}
+
+/* ================= 文件树 ================= */
 const tree = [
   { n: 'web', d: true, open: true, kids: [
-    { n: '.next', d: true },
-    { n: 'node_modules', d: true },
-    { n: 'public', d: true },
+    { n: '.next', d: true }, { n: 'node_modules', d: true }, { n: 'public', d: true },
     { n: 'src', d: true, open: true, kids: [
       { n: 'app', d: true, open: true, kids: [
-        { n: 'favicon.ico', star: true },
-        { n: 'globals.css', css: true },
-        { n: 'index.tsx', ts: true, active: true },
-        { n: 'layout.tsx', ts: true }
+        { n: 'favicon.ico', star: true }, { n: 'globals.css', css: true },
+        { n: 'index.tsx', ts: true, active: true }, { n: 'layout.tsx', ts: true }
       ]},
-      { n: 'components', d: true },
-      { n: 'lib', d: true }
+      { n: 'components', d: true }, { n: 'lib', d: true }
     ]},
-    { n: '.env.local', d: false },
-    { n: '.gitignore', d: false },
-    { n: 'next.config.ts', ts: true },
-    { n: 'package.json', json: true },
-    { n: 'README.md', md: true },
+    { n: '.env.local' }, { n: '.gitignore' }, { n: 'next.config.ts', ts: true },
+    { n: 'package.json', json: true }, { n: 'README.md', md: true },
     { n: 'tailwind.config.ts', ts: true }
   ]}
 ];
@@ -483,6 +536,7 @@ function renderTree(nodes, container) {
   });
 }
 
+/* ================= 代码 ================= */
 const sampleCode = `import { Inter } from "next/font/google";
 import type { Metadata } from "next";
 
@@ -506,8 +560,7 @@ export default function Home() {
 }`;
 
 function highlight(code) {
-  const esc = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  let out = esc;
+  let out = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   out = out.replace(/(&quot;[^&\n]*?&quot;)/g, '<span class="s">$1</span>');
   out = out.replace(/\b(const|let|var|function|return|import|from|export|default|type|async|await|new|if|else|for|of|in)\b/g, '<span class="k">$1</span>');
   out = out.replace(/\b(Inter|Metadata|Hero|Features|main|Home)\b/g, '<span class="t">$1</span>');
@@ -515,14 +568,21 @@ function highlight(code) {
   return out;
 }
 
+/* ================= 启动 ================= */
 function boot() {
-  const gutter = document.getElementById('gutter');
-  const codeEl = document.getElementById('code');
+  applyLang();
+
+  document.getElementById('langBtn').onclick = () => {
+    lang = lang === 'zh' ? 'en' : 'zh';
+    applyLang();
+  };
+
   const lines = sampleCode.split('\n');
-  gutter.innerHTML = lines.map((_, i) =>
-    i === 15 ? `<span style="color:#8ab4f8">${i+1}</span>` : (i + 1)
+  document.getElementById('gutter').innerHTML = lines.map((_, i) =>
+    i === 15 ? `<span style="color:#2563eb;font-weight:600">${i+1}</span>` : (i + 1)
   ).join('<br>');
-  codeEl.innerHTML = highlight(sampleCode);
+  document.getElementById('code').innerHTML = highlight(sampleCode);
+
   renderTree(tree, document.getElementById('fileTree'));
 
   document.querySelectorAll('.nav-item').forEach(item => {
