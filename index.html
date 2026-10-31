@@ -3,493 +3,556 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>demoputter · AI 的仓库工作台</title>
-<meta name="description" content="demoputter — 预览板、文件树、版本与工作流，一个界面管完。">
+<title>demoputter</title>
 <style>
-/* ============================================================
-   demoputter · Apple-ish 白蓝体系
-   比例系统：
-   - 黄金分割 1.618：布局列宽 / 标题层级
-   - 白银分割 1.414：字号阶梯 / 间距阶梯
-   - 缓动：cubic-bezier(.32,.72,0,1)（Apple 默认曲线）
-   ============================================================ */
 :root {
-  /* 色彩 —— 60/30/10：白灰 60 · 蓝 30 · 深墨 10 */
-  --bg: #f5f5f7;
-  --card: #ffffff;
-  --text: #1d1d1f;
-  --dim: #6e6e73;
-  --dim-2: #a1a1a6;
-  --blue: #0071e3;
-  --blue-hover: #0077ed;
-  --blue-soft: rgba(0, 113, 227, .08);
-  --line: rgba(0, 0, 0, .07);
-  --line-strong: rgba(0, 0, 0, .12);
-  /* 字号阶梯（白银 1.414） */
-  --fs-xs: 10.5px;
-  --fs-sm: 12px;
-  --fs-md: 15px;
-  --fs-lg: 21px;
-  --fs-xl: 30px;
-  /* 间距阶梯（白银） */
-  --sp-1: 6px;
-  --sp-2: 8.5px;
-  --sp-3: 12px;
-  --sp-4: 17px;
-  --sp-5: 24px;
-  --sp-6: 34px;
-  /* 圆角 / 阴影 */
-  --r-sm: 10px;
-  --r-md: 14px;
-  --r-lg: 20px;
-  --shadow-1: 0 1px 2px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.04);
-  --shadow-2: 0 2px 6px rgba(0,0,0,.05), 0 12px 32px rgba(0,0,0,.08);
-  /* 缓动 */
-  --ease: cubic-bezier(.32,.72,0,1);
+  --bg: #0a0c10;
+  --bg-2: #0e1116;
+  --bg-3: #14181f;
+  --panel: #10141a;
+  --line: #1e232c;
+  --line-2: #2a3039;
+  --text: #e6edf3;
+  --dim: #8b949e;
+  --dim-2: #5c6470;
+  --blue: #3b82f6;
+  --blue-soft: rgba(59,130,246,.13);
+  --green: #3fb950;
+  --orange: #d29922;
+  --purple: #a371f7;
+  --cyan: #39c5cf;
+  --mono: "SF Mono", "JetBrains Mono", "Cascadia Code", Consolas, monospace;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
 body {
   background: var(--bg);
   color: var(--text);
-  font: var(--fs-md)/1.6 -apple-system, "SF Pro Display", "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 13px/1.55 -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
-  letter-spacing: -.01em;
-  overflow: hidden;
 }
-button, input, textarea { font: inherit; color: inherit; }
-a { color: var(--blue); text-decoration: none; }
+button { font: inherit; color: inherit; border: none; background: none; cursor: pointer; }
+input { font: inherit; color: inherit; }
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-thumb { background: #2a3039; border-radius: 9px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: #3a4250; background-clip: padding-box; }
+::-webkit-scrollbar-track { background: transparent; }
 
-.shell {
-  display: grid;
-  grid-template-rows: 64px 1fr 34px;
-  height: 100vh;
-}
+/* ====== 总布局 ====== */
+.app { display: flex; height: 100vh; }
 
-/* ================= 顶栏：毛玻璃 ================= */
-.topbar {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  padding: 0 var(--sp-5);
-  background: rgba(255, 255, 255, .72);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid var(--line);
-  z-index: 20;
-}
-.brand {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-2);
-  font-size: var(--fs-lg);
-  font-weight: 700;
-  letter-spacing: -.03em;
-}
-.brand .mark {
-  display: inline-block;
-  width: 22px; height: 22px;
-  border-radius: 7px;
-  background: linear-gradient(135deg, var(--blue), #42a5ff);
-  box-shadow: 0 2px 8px rgba(0,113,227,.35);
-  position: relative;
-  top: 2px;
-}
-.brand .mark::after {
-  content: "";
-  position: absolute;
-  inset: 6px;
-  border-radius: 50%;
-  background: #fff;
-  opacity: .9;
-}
-.brand small {
-  font-size: var(--fs-xs);
-  font-weight: 500;
-  color: var(--dim-2);
-  letter-spacing: .14em;
-  text-transform: uppercase;
-}
-
-.status {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-1);
-  font-size: var(--fs-sm);
-  color: var(--dim);
-}
-.status .led {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--dim-2);
-  transition: background .3s var(--ease), box-shadow .3s var(--ease);
-}
-.status.on .led { background: #30d158; box-shadow: 0 0 8px rgba(48,209,88,.6); }
-.status.err .led { background: #ff453a; box-shadow: 0 0 8px rgba(255,69,58,.5); }
-
-.token-box {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-}
-.token-box input {
-  width: 280px;
-  background: var(--card);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
-  padding: 8px var(--sp-3);
-  font-size: var(--fs-sm);
-  outline: none;
-  transition: border-color .25s var(--ease), box-shadow .25s var(--ease);
-}
-.token-box input:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 4px var(--blue-soft);
-}
-
-/* ================= 按钮 ================= */
-.btn {
-  border: 1px solid var(--line-strong);
-  background: var(--card);
-  border-radius: var(--r-sm);
-  padding: 8px var(--sp-4);
-  font-size: var(--fs-sm);
-  font-weight: 500;
-  cursor: pointer;
-  transition: transform .22s var(--ease), box-shadow .22s var(--ease), background .22s var(--ease);
-  white-space: nowrap;
-}
-.btn:hover {
-  box-shadow: var(--shadow-1);
-  transform: translateY(-1px);
-}
-.btn:active { transform: translateY(0) scale(.98); }
-.btn.primary {
-  background: var(--blue);
-  border-color: var(--blue);
-  color: #fff;
-  font-weight: 600;
-}
-.btn.primary:hover { background: var(--blue-hover); box-shadow: 0 4px 16px rgba(0,113,227,.32); }
-.btn.ghost { background: transparent; border-color: transparent; color: var(--dim); }
-.btn.ghost:hover { background: rgba(0,0,0,.04); }
-.btn:disabled {
-  opacity: .38;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* ================= 主区：黄金分割三栏 ================= */
-.main {
-  display: grid;
-  grid-template-columns: 0.618fr 1fr 1.618fr; /* 黄金比递进 */
-  min-height: 0;
-  background: var(--bg);
-}
-.col {
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  padding: var(--sp-3);
-  gap: var(--sp-3);
-}
-.col-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px var(--sp-2);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--dim-2);
-  flex-shrink: 0;
-}
-.col-body {
-  flex: 1;
-  overflow: auto;
-  border-radius: var(--r-lg);
-  background: var(--card);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-1);
-  padding: var(--sp-2);
-  min-height: 0;
-}
-.col-body::-webkit-scrollbar { width: 8px; height: 8px; }
-.col-body::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,.14);
-  border-radius: 8px;
-}
-.col-body::-webkit-scrollbar-track { background: transparent; }
-
-/* ================= 仓库列表 ================= */
-.repo {
-  padding: var(--sp-2) var(--sp-3);
-  border-radius: var(--r-md);
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: background .22s var(--ease), border-color .22s var(--ease), transform .22s var(--ease);
-  margin-bottom: 3px;
-}
-.repo:hover {
-  background: rgba(0,0,0,.025);
-  transform: translateX(2px);
-}
-.repo.active {
-  background: var(--blue-soft);
-  border-color: rgba(0,113,227,.22);
-}
-.repo .name {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-1);
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  letter-spacing: -.01em;
-}
-.repo .meta { font-size: var(--fs-xs); color: var(--dim-2); margin-top: 1px; }
-.badge {
-  font-size: 9.5px;
-  font-weight: 600;
-  padding: 1px 7px;
-  border-radius: 99px;
-  letter-spacing: .04em;
-  background: rgba(0,0,0,.04);
-  color: var(--dim);
-}
-.badge.pub { background: rgba(48,209,88,.12); color: #1a8f3f; }
-.badge.priv { background: rgba(0,113,227,.10); color: var(--blue); }
-
-/* ================= 文件树 ================= */
-.tree { font-size: var(--fs-sm); }
-.tree .item {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-1);
-  padding: 6px 10px;
-  border-radius: var(--r-sm);
-  cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-  transition: background .18s var(--ease), color .18s var(--ease);
-}
-.tree .item:hover { background: rgba(0,0,0,.035); }
-.tree .item.active { background: var(--blue-soft); color: var(--blue); font-weight: 600; }
-.tree .item .ico { width: 15px; text-align: center; color: var(--dim-2); flex-shrink: 0; font-size: 11px; }
-.tree .item.dir .ico { color: var(--blue); }
-.tree .item .nm { overflow: hidden; text-overflow: ellipsis; }
-.tree .children { padding-left: 15px; }
-
-/* ================= 预览 / 编辑器 ================= */
-.preview-head {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: 0 var(--sp-2);
-  flex-shrink: 0;
-}
-.preview-head .path {
-  font-size: var(--fs-sm);
-  font-weight: 500;
-  color: var(--dim);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.preview-body {
-  flex: 1;
-  min-height: 0;
-  border-radius: var(--r-lg);
-  background: var(--card);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-1);
-  overflow: hidden;
-  display: flex;
-}
-.editor-wrap { display: flex; width: 100%; min-height: 0; }
-.line-nums {
-  width: 46px;
-  flex-shrink: 0;
-  background: #fafafc;
+/* ====== 一级：窄条 ====== */
+.rail {
+  width: 72px; flex-shrink: 0;
+  background: var(--bg-2);
   border-right: 1px solid var(--line);
-  color: var(--dim-2);
-  font: var(--fs-sm)/1.62 "SF Mono", "JetBrains Mono", Consolas, monospace;
-  text-align: right;
-  padding: var(--sp-4) 10px var(--sp-4) 0;
-  overflow: hidden;
-  user-select: none;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 12px 0 10px;
 }
-#editor {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  resize: none;
-  color: var(--text);
-  font: var(--fs-sm)/1.62 "SF Mono", "JetBrains Mono", Consolas, monospace;
-  padding: var(--sp-4) var(--sp-3);
-  tab-size: 2;
+.logo { font-weight: 800; font-size: 15px; letter-spacing: -.6px; color: var(--text); margin-bottom: 20px; }
+.logo b { color: var(--blue); }
+.rail-item {
+  width: 44px; height: 44px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; border-radius: 10px; margin-bottom: 4px;
+  color: var(--dim-2); transition: background .16s, color .16s;
+  position: relative;
 }
-.markdown-preview {
-  padding: var(--sp-5);
-  line-height: 1.8;
-  color: var(--text);
-  white-space: pre-wrap;
-  font-size: var(--fs-md);
-  overflow: auto;
-  width: 100%;
+.rail-item:hover { background: rgba(255,255,255,.05); color: var(--dim); }
+.rail-item.active { background: var(--blue-soft); color: var(--blue); }
+.rail-item.active::before {
+  content: ""; position: absolute; left: -12px; top: 10px; bottom: 10px;
+  width: 2px; border-radius: 2px; background: var(--blue);
 }
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-2);
-  height: 100%;
-  color: var(--dim-2);
-  font-size: var(--fs-sm);
-  text-align: center;
-  padding: var(--sp-6);
-}
-.empty .big { font-size: var(--fs-xl); opacity: .28; }
+.rail-item svg { width: 19px; height: 19px; }
+.rail-item span { font-size: 9px; letter-spacing: .2px; }
+.rail-gap { flex: 1; }
 
-/* ================= 操作条 ================= */
-.actions {
-  display: flex;
-  gap: var(--sp-2);
-  align-items: center;
-  flex-shrink: 0;
-  padding: 0 var(--sp-2);
+/* ====== 二级：侧栏 ====== */
+.side {
+  width: 248px; flex-shrink: 0;
+  background: var(--bg-2);
+  border-right: 1px solid var(--line);
+  display: flex; flex-direction: column;
+  min-height: 0;
 }
-.actions .spacer { flex: 1; }
-
-/* ================= 页脚 ================= */
-.footer {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-5);
-  padding: 0 var(--sp-5);
-  background: rgba(255,255,255,.6);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid var(--line);
-  font-size: var(--fs-xs);
-  color: var(--dim-2);
+.side-top { padding: 12px 12px 8px; }
+.repo-switch {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 14px; font-weight: 600; padding: 4px 2px;
+  width: 100%; text-align: left; border-radius: 8px;
 }
-.footer .k { color: var(--dim-2); text-transform: uppercase; letter-spacing: .08em; }
-.footer .v { color: var(--dim); font-family: "SF Mono", Consolas, monospace; }
-
-/* ================= Toast ================= */
-.toast {
-  position: fixed;
-  right: var(--sp-5);
-  bottom: 52px;
-  max-width: 400px;
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--r-md);
-  background: rgba(255,255,255,.92);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--shadow-2);
-  font-size: var(--fs-sm);
-  opacity: 0;
-  transform: translateY(12px) scale(.98);
-  transition: opacity .3s var(--ease), transform .3s var(--ease);
-  pointer-events: none;
-  z-index: 60;
+.repo-switch:hover { background: rgba(255,255,255,.04); }
+.repo-switch .org { color: var(--text); }
+.repo-switch .sep { color: var(--dim-2); }
+.repo-switch .arrow { margin-left: auto; color: var(--dim-2); font-size: 10px; }
+.search-wrap { margin-top: 8px; position: relative; }
+.search-wrap input {
+  width: 100%; background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 8px; padding: 6px 10px 6px 28px; font-size: 12px; outline: none;
 }
-.toast.show { opacity: 1; transform: translateY(0) scale(1); }
-.toast.ok { border-color: rgba(48,209,88,.5); }
-.toast.err { border-color: rgba(255,69,58,.5); }
-
-/* ================= 动效 ================= */
-.spin {
-  width: 15px; height: 15px;
-  border: 2px solid rgba(0,0,0,.10);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  animation: sp .7s linear infinite;
-  display: inline-block;
+.search-wrap input:focus { border-color: var(--blue); }
+.search-wrap::before {
+  content: "⌕"; position: absolute; left: 9px; top: 4px; color: var(--dim-2); font-size: 14px;
 }
-@keyframes sp { to { transform: rotate(360deg); } }
-
-.fade-in { animation: fadeIn .35s var(--ease); }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+.side-nav { flex: 1; overflow-y: auto; padding: 6px 8px 12px; min-height: 0; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 10px; border-radius: 8px; width: 100%; text-align: left;
+  color: var(--dim); font-size: 13px; margin-bottom: 1px;
+  transition: background .14s, color .14s;
+}
+.nav-item:hover { background: rgba(255,255,255,.045); color: var(--text); }
+.nav-item.active { background: var(--blue-soft); color: #8ab4f8; font-weight: 500; }
+.nav-item .ico { width: 16px; text-align: center; opacity: .8; font-size: 13px; flex-shrink: 0; }
+.nav-item .cnt {
+  margin-left: auto; font-size: 10.5px; background: #262d38; color: var(--dim);
+  padding: 1px 6px; border-radius: 99px; min-width: 20px; text-align: center;
 }
 
-/* ================= 响应式 ================= */
-@media (max-width: 1280px) {
-  .main { grid-template-columns: 0.618fr 1fr 1.3fr; }
+/* ====== 三级：主区 ====== */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
+
+/* 标签页 */
+.tabs {
+  height: 40px; flex-shrink: 0; display: flex; align-items: stretch;
+  background: var(--bg-2); border-bottom: 1px solid var(--line);
+  overflow-x: auto; overflow-y: hidden;
 }
-@media (max-width: 1080px) {
-  .main { grid-template-columns: 220px 1fr; }
-  .col.preview-col { display: none; }
+.tabs::-webkit-scrollbar { height: 0; }
+.tab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 13px; font-size: 12px; color: var(--dim);
+  border-right: 1px solid var(--line); white-space: nowrap;
+  position: relative; transition: background .14s, color .14s;
 }
+.tab:hover { background: rgba(255,255,255,.03); color: var(--text); }
+.tab.active { background: var(--bg); color: var(--text); }
+.tab.active::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--blue);
+}
+.tab .ftype { font-size: 10px; font-weight: 700; flex-shrink: 0; }
+.tab .x { opacity: 0; font-size: 11px; padding: 1px 4px; border-radius: 4px; }
+.tab:hover .x, .tab.active .x { opacity: .55; }
+.tab .x:hover { opacity: 1; background: rgba(255,255,255,.09); }
+.tab-add { display: flex; align-items: center; padding: 0 14px; color: var(--dim-2); font-size: 16px; }
+.tab-add:hover { color: var(--text); }
+
+/* 主内容：编辑器 + 右侧文件树 */
+.workspace { flex: 1; display: flex; min-height: 0; }
+
+/* 编辑器区 */
+.editor-area { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.editor-bar {
+  height: 38px; flex-shrink: 0; display: flex; align-items: center; gap: 10px;
+  padding: 0 14px; border-bottom: 1px solid var(--line); background: var(--bg);
+}
+.breadcrumb { font-size: 12px; color: var(--dim); }
+.breadcrumb .f { color: var(--text); }
+.editor-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.mini-btn {
+  font-size: 11.5px; padding: 3px 10px; border-radius: 6px;
+  color: var(--dim); border: 1px solid transparent;
+}
+.mini-btn:hover { background: rgba(255,255,255,.05); color: var(--text); }
+.mini-btn.primary { background: var(--blue-soft); color: #8ab4f8; }
+
+.code-scroll { flex: 1; overflow: auto; display: flex; min-height: 0; }
+.gutter {
+  width: 52px; flex-shrink: 0; background: var(--bg);
+  color: #3b424d; font: 12.5px/1.65 var(--mono); text-align: right;
+  padding: 12px 12px 12px 0; user-select: none; border-right: 1px solid var(--line);
+}
+.code {
+  flex: 1; margin: 0; padding: 12px 18px; overflow: visible;
+  font: 12.5px/1.65 var(--mono); color: #c9d1d9; white-space: pre; tab-size: 2;
+}
+.k { color: #ff7b72; } .s { color: #a5d6ff; } .c { color: #6a737d; font-style: italic; }
+.t { color: #7ee787; } .a { color: #d2a8ff; }
+
+/* 右侧文件树 */
+.filetree {
+  width: 260px; flex-shrink: 0; border-left: 1px solid var(--line);
+  background: var(--bg-2); display: flex; flex-direction: column; min-height: 0;
+}
+.ft-head {
+  height: 38px; flex-shrink: 0; display: flex; align-items: center; gap: 6px;
+  padding: 0 12px; border-bottom: 1px solid var(--line);
+  font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dim-2);
+}
+.ft-head .acts { margin-left: auto; display: flex; gap: 2px; }
+.ft-body { flex: 1; overflow: auto; padding: 6px 6px 12px; font-size: 12.5px; }
+.ft-row {
+  display: flex; align-items: center; gap: 5px; padding: 3.5px 8px;
+  border-radius: 6px; cursor: pointer; white-space: nowrap; color: var(--dim);
+}
+.ft-row:hover { background: rgba(255,255,255,.04); color: var(--text); }
+.ft-row.active { background: var(--blue-soft); color: #8ab4f8; }
+.ft-row .tw { width: 10px; color: var(--dim-2); font-size: 9px; flex-shrink: 0; }
+.ft-row .fi { font-size: 11px; flex-shrink: 0; width: 14px; text-align: center; }
+.ft-row .nm { overflow: hidden; text-overflow: ellipsis; }
+.ft-kids { padding-left: 15px; }
+.icon-ts { color: #3178c6; } .icon-md { color: var(--dim); } .icon-json { color: var(--orange); }
+.icon-css { color: var(--purple); } .icon-folder { color: #8b949e; } .icon-star { color: var(--orange); }
+
+/* 底部面板 */
+.bottom {
+  height: 168px; flex-shrink: 0; border-top: 1px solid var(--line);
+  background: var(--bg-2); display: flex; flex-direction: column;
+}
+.bottom-tabs { height: 34px; flex-shrink: 0; display: flex; align-items: stretch; border-bottom: 1px solid var(--line); }
+.bt {
+  display: flex; align-items: center; gap: 6px; padding: 0 13px;
+  font-size: 11.5px; color: var(--dim-2); border-right: 1px solid var(--line);
+  letter-spacing: .2px;
+}
+.bt.active { color: var(--text); background: var(--bg); box-shadow: inset 0 2px 0 var(--blue); }
+.bt .cnt { font-size: 10px; background: #262d38; padding: 0 5px; border-radius: 99px; color: var(--dim); }
+.bottom-right { margin-left: auto; display: flex; align-items: center; gap: 8px; padding-right: 8px; }
+.sel {
+  background: var(--bg-3); border: 1px solid var(--line-2); border-radius: 6px;
+  padding: 3px 8px; font-size: 11px; color: var(--dim);
+}
+.bottom-body { flex: 1; overflow: auto; padding: 10px 14px; font: 12px/1.62 var(--mono); min-height: 0; }
+.term-line { color: var(--dim); }
+.term-line .prompt { color: var(--green); }
+.term-line .path { color: #8ab4f8; }
+.term-line .ok { color: var(--green); }
+.term-line .info { color: var(--cyan); }
+.term-line .warn { color: var(--orange); }
+
+/* 右侧助理面板 */
+.assistant {
+  width: 300px; flex-shrink: 0; border-left: 1px solid var(--line);
+  background: var(--bg-2); display: flex; flex-direction: column;
+}
+.as-head {
+  height: 38px; flex-shrink: 0; display: flex; align-items: center; gap: 8px;
+  padding: 0 14px; border-bottom: 1px solid var(--line);
+  font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dim-2);
+}
+.as-body { flex: 1; overflow: auto; padding: 14px; min-height: 0; }
+.as-hero { text-align: center; padding: 18px 4px 14px; }
+.as-hero .spark { font-size: 26px; color: var(--blue); margin-bottom: 8px; }
+.as-hero h3 { margin: 0 0 4px; font-size: 14px; }
+.as-hero p { margin: 0; font-size: 11.5px; color: var(--dim-2); line-height: 1.5; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 14px; }
+.chip {
+  font-size: 11px; padding: 5px 10px; border-radius: 99px;
+  border: 1px solid var(--line-2); color: var(--dim); background: var(--bg-3);
+}
+.chip:hover { border-color: var(--blue); color: var(--text); }
+.as-input {
+  flex-shrink: 0; display: flex; gap: 7px; padding: 10px 12px; border-top: 1px solid var(--line);
+}
+.as-input input {
+  flex: 1; background: var(--bg-3); border: 1px solid var(--line-2);
+  border-radius: 8px; padding: 7px 10px; font-size: 12px; outline: none;
+}
+.as-input input:focus { border-color: var(--blue); }
+.as-send {
+  width: 30px; border-radius: 8px; background: var(--blue); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 13px;
+}
+
+/* 状态栏 */
+.statusbar {
+  height: 24px; flex-shrink: 0; display: flex; align-items: center; gap: 14px;
+  padding: 0 14px; background: var(--bg-2); border-top: 1px solid var(--line);
+  font-size: 10.5px; color: var(--dim-2);
+}
+.statusbar .kbd {
+  background: #232a34; border-radius: 4px; padding: 0 5px; font-size: 10px; color: #8ab4f8;
+}
+.statusbar .spacer { flex: 1; }
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="app">
 
-  <header class="topbar">
-    <div class="brand">
-      <span class="mark"></span>
-      demoputter <small>for ai</small>
+  <nav class="rail">
+    <div class="logo">demo<b>putter</b></div>
+    <button class="rail-item" title="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+    </button>
+    <div style="height:10px"></div>
+    <button class="rail-item active" data-ws="web">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>web</span>
+    </button>
+    <button class="rail-item" data-ws="api">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+      <span>api</span>
+    </button>
+    <button class="rail-item" data-ws="mobile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></svg>
+      <span>mobile</span>
+    </button>
+    <button class="rail-item" data-ws="infra">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 8l8-4 8 4-8 4-8-4z"/><path d="M4 12l8 4 8-4"/><path d="M4 16l8 4 8-4"/></svg>
+      <span>infra</span>
+    </button>
+    <button class="rail-item" data-ws="docs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/></svg>
+      <span>docs</span>
+    </button>
+    <button class="rail-item" data-ws="design">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg>
+      <span>design</span>
+    </button>
+    <div class="rail-gap"></div>
+    <button class="rail-item" title="添加工作区">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </nav>
+
+  <aside class="side">
+    <div class="side-top">
+      <button class="repo-switch">
+        <span class="org">acme</span><span class="sep">/</span><span>web</span>
+        <span class="arrow">▾</span>
+      </button>
+      <div class="search-wrap">
+        <input placeholder="Search in repository…" id="sideSearch">
+      </div>
     </div>
-    <div class="status" id="status"><span class="led"></span><span id="statusText">未连接</span></div>
-    <div class="token-box">
-      <input id="token" type="password" placeholder="ghp_... GitHub token（只存本地）">
-      <button class="btn primary" id="connectBtn">连接</button>
-      <button class="btn ghost" id="disconnectBtn" title="清除 token">断开</button>
+    <div class="side-nav" id="sideNav">
+      <button class="nav-item active" data-view="files"><span class="ico">▤</span>Files</button>
+      <button class="nav-item" data-view="commits"><span class="ico">◷</span>Commits</button>
+      <button class="nav-item" data-view="pulls"><span class="ico">⇄</span>Pull Requests<span class="cnt">3</span></button>
+      <button class="nav-item" data-view="issues"><span class="ico">◎</span>Issues<span class="cnt">12</span></button>
+      <button class="nav-item" data-view="actions"><span class="ico">▶</span>Actions</button>
+      <button class="nav-item" data-view="releases"><span class="ico">◇</span>Releases</button>
+      <button class="nav-item" data-view="settings"><span class="ico">⚙</span>Settings</button>
     </div>
-  </header>
+  </aside>
 
-  <div class="main">
+  <main class="main">
+    <div class="tabs" id="tabs">
+      <div class="tab active"><span class="ftype icon-ts">◈</span>index.tsx<span class="x">×</span></div>
+      <div class="tab"><span class="ftype icon-ts">◈</span>auth.ts<span class="x">×</span></div>
+      <div class="tab"><span class="ftype icon-ts">◈</span>tailwind.config.ts<span class="x">×</span></div>
+      <div class="tab"><span class="ftype icon-md">▤</span>README.md<span class="x">×</span></div>
+      <div class="tab"><span class="ftype icon-folder">◈</span>docker-compose.yml<span class="x">×</span></div>
+      <div class="tab-add">+</div>
+    </div>
 
-    <aside class="col">
-      <div class="col-head"><span>仓库</span><button class="btn ghost" id="refreshBtn" title="刷新">↻</button></div>
-      <div class="col-body" id="repoList">
-        <div class="empty"><span class="big">◈</span>连接 token 后加载</div>
+    <div class="workspace">
+      <div class="editor-area">
+        <div class="editor-bar">
+          <span class="breadcrumb">src / app / <span class="f">index.tsx</span></span>
+          <span style="color:var(--dim-2);font-size:11px">⧉</span>
+          <div class="editor-actions">
+            <button class="mini-btn">Pretty</button>
+            <button class="mini-btn">Blame</button>
+            <button class="mini-btn">⋯</button>
+          </div>
+        </div>
+        <div class="code-scroll">
+          <div class="gutter" id="gutter"></div>
+          <pre class="code" id="code"></pre>
+        </div>
       </div>
-    </aside>
 
-    <section class="col">
-      <div class="col-head"><span id="treeTitle">文件树</span><span class="badge" id="branchBadge">-</span></div>
-      <div class="col-body" id="treeBody">
-        <div class="empty"><span class="big">◇</span>选一个仓库</div>
+      <div class="filetree">
+        <div class="ft-head">Files
+          <div class="acts">
+            <button class="mini-btn" title="下载">⤓</button>
+            <button class="mini-btn" title="新建">⊞</button>
+            <button class="mini-btn" title="更多">⋯</button>
+          </div>
+        </div>
+        <div class="ft-body" id="fileTree"></div>
       </div>
-    </section>
+    </div>
 
-    <section class="col preview-col">
-      <div class="preview-head">
-        <span class="path" id="filePath">未选择文件</span>
-        <button class="btn" id="saveBtn" style="margin-left:auto;display:none">保存</button>
+    <div class="bottom">
+      <div class="bottom-tabs">
+        <div class="bt active">Terminal</div>
+        <div class="bt">Problems <span class="cnt">0</span></div>
+        <div class="bt">Output</div>
+        <div class="bt">Debug Console</div>
+        <div class="bottom-right">
+          <span class="sel">zsh ▾</span>
+          <span class="sel">Assistant ▾</span>
+        </div>
       </div>
-      <div class="preview-body" id="previewBody">
-        <div class="empty"><span class="big">◌</span>点一个文件看内容</div>
+      <div class="bottom-body" id="terminal">
+        <div class="term-line"><span class="prompt">macbook:web acme$</span> pnpm dev</div>
+        <div class="term-line"> </div>
+        <div class="term-line">&gt; web@0.1.0 dev /Users/acme/projects/web</div>
+        <div class="term-line">&gt; next dev</div>
+        <div class="term-line"> </div>
+        <div class="term-line"><span class="info">▲ Next.js 14.2.3</span></div>
+        <div class="term-line">- Local:        <span class="path">http://localhost:3000</span></div>
+        <div class="term-line">- Network:      http://192.168.1.24:3000</div>
+        <div class="term-line"> </div>
+        <div class="term-line"><span class="ok">✓ Ready in 812ms</span></div>
+        <div class="term-line"><span class="ok">✓ Compiled / in 2.1s (483 modules)</span></div>
+        <div class="term-line"><span class="ok">✓ Compiled /_app in 268ms</span></div>
       </div>
-      <div class="actions">
-        <button class="btn" id="commitBtn" disabled>提交</button>
-        <button class="btn primary" id="pushBtn" disabled>推送</button>
-        <span class="spacer"></span>
-        <button class="btn" id="workflowBtn" disabled>工作流</button>
-      </div>
-    </section>
+    </div>
 
-  </div>
+    <div class="statusbar">
+      <span>main*</span>
+      <span>TypeScript</span>
+      <span class="spacer"></span>
+      <span><span class="kbd">⌘K</span> to open command palette</span>
+      <span>Claude 3.5 Sonnet</span>
+    </div>
+  </main>
 
-  <footer class="footer">
-    <span><span class="k">token</span> <span class="v" id="fpToken">-</span></span>
-    <span><span class="k">repo</span> <span class="v" id="fpRepo">-</span></span>
-    <span><span class="k">file</span> <span class="v" id="fpFile">-</span></span>
-    <span style="margin-left:auto"><span class="k">demoputter</span> <span class="v">v0.1</span></span>
-  </footer>
+  <aside class="assistant">
+    <div class="as-head">Assistant</div>
+    <div class="as-body">
+      <div class="as-hero">
+        <div class="spark">✦</div>
+        <h3>How can I help?</h3>
+        <p>Ask about your code, debug issues,<br>or suggest improvements.</p>
+        <div class="chips">
+          <button class="chip">Explain this file</button>
+          <button class="chip">Find bugs</button>
+          <button class="chip">Refactor</button>
+          <button class="chip">Write tests</button>
+          <button class="chip">Add a feature</button>
+          <button class="chip">Improve performance</button>
+        </div>
+      </div>
+    </div>
+    <div class="as-input">
+      <input placeholder="Ask anything…">
+      <button class="as-send">➤</button>
+    </div>
+  </aside>
 
 </div>
-<div class="toast" id="toast"></div>
-<script src="app.js"></script>
+
+<script>
+const tree = [
+  { n: 'web', d: true, open: true, kids: [
+    { n: '.next', d: true },
+    { n: 'node_modules', d: true },
+    { n: 'public', d: true },
+    { n: 'src', d: true, open: true, kids: [
+      { n: 'app', d: true, open: true, kids: [
+        { n: 'favicon.ico', star: true },
+        { n: 'globals.css', css: true },
+        { n: 'index.tsx', ts: true, active: true },
+        { n: 'layout.tsx', ts: true }
+      ]},
+      { n: 'components', d: true },
+      { n: 'lib', d: true }
+    ]},
+    { n: '.env.local', d: false },
+    { n: '.gitignore', d: false },
+    { n: 'next.config.ts', ts: true },
+    { n: 'package.json', json: true },
+    { n: 'README.md', md: true },
+    { n: 'tailwind.config.ts', ts: true }
+  ]}
+];
+
+const iconFor = (node) => {
+  if (node.d) return { cls: 'icon-folder', ch: '▸' };
+  if (node.star) return { cls: 'icon-star', ch: '★' };
+  if (node.ts) return { cls: 'icon-ts', ch: '◈' };
+  if (node.css) return { cls: 'icon-css', ch: '#' };
+  if (node.json) return { cls: 'icon-json', ch: '{}' };
+  if (node.md) return { cls: 'icon-md', ch: '▤' };
+  return { cls: 'icon-md', ch: '·' };
+};
+
+function renderTree(nodes, container) {
+  nodes.forEach(node => {
+    const ic = iconFor(node);
+    const row = document.createElement('div');
+    row.className = 'ft-row' + (node.active ? ' active' : '');
+    row.innerHTML = `<span class="tw">${node.d ? (node.open ? '▾' : '▸') : ''}</span>
+      <span class="fi ${ic.cls}">${ic.ch}</span><span class="nm">${node.n}</span>`;
+    row.onclick = () => {
+      if (node.d) { node.open = !node.open; container.innerHTML = ''; renderTree(tree, container); }
+    };
+    container.appendChild(row);
+    if (node.d && node.open && node.kids) {
+      const kids = document.createElement('div');
+      kids.className = 'ft-kids';
+      container.appendChild(kids);
+      renderTree(node.kids, kids);
+    }
+  });
+}
+
+const sampleCode = `import { Inter } from "next/font/google";
+import type { Metadata } from "next";
+
+import { Hero } from "@/components/hero";
+import { Features } from "@/components/features";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "demoputter",
+  description: "The developer workspace for modern teams.",
+};
+
+export default function Home() {
+  return (
+    <main className="min-h-screen bg-background">
+      <Hero />
+      <Features />
+    </main>
+  );
+}`;
+
+function highlight(code) {
+  const esc = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  let out = esc;
+  out = out.replace(/(&quot;[^&\n]*?&quot;)/g, '<span class="s">$1</span>');
+  out = out.replace(/\b(const|let|var|function|return|import|from|export|default|type|async|await|new|if|else|for|of|in)\b/g, '<span class="k">$1</span>');
+  out = out.replace(/\b(Inter|Metadata|Hero|Features|main|Home)\b/g, '<span class="t">$1</span>');
+  out = out.replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)/g, '$1<span class="a">$2</span>');
+  return out;
+}
+
+function boot() {
+  const gutter = document.getElementById('gutter');
+  const codeEl = document.getElementById('code');
+  const lines = sampleCode.split('\n');
+  gutter.innerHTML = lines.map((_, i) =>
+    i === 15 ? `<span style="color:#8ab4f8">${i+1}</span>` : (i + 1)
+  ).join('<br>');
+  codeEl.innerHTML = highlight(sampleCode);
+  renderTree(tree, document.getElementById('fileTree'));
+
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.onclick = () => {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    };
+  });
+  document.querySelectorAll('.rail-item[data-ws]').forEach(item => {
+    item.onclick = () => {
+      document.querySelectorAll('.rail-item[data-ws]').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    };
+  });
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.onclick = (e) => {
+      if (e.target.classList.contains('x')) { tab.remove(); return; }
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    };
+  });
+  document.querySelectorAll('.bt').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.bt').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    };
+  });
+}
+
+document.addEventListener('DOMContentLoaded', boot);
+</script>
 </body>
 </html>
